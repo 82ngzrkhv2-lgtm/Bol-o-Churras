@@ -57,7 +57,7 @@ export default function GroupLanding() {
 
       setMatches(m || [])
       const partsData = parts || []
-      const paidCount = partsData.filter(p => p.has_paid).length
+      const paidCount = partsData.filter(p => p.payment_status === 'paid').length
       setTotalArrecadado(paidCount * (g.pool_entry_fee || 0))
       
       computeRanking(partsData, m || [])
@@ -264,7 +264,7 @@ export default function GroupLanding() {
                     {participant.name}
                   </p>
                   <p style={{ color: 'var(--text-muted)', fontSize: '0.72rem' }}>
-                    {participant.has_paid ? '✅ Pagamento confirmado' : '⏳ Pagamento pendente'}
+                    {participant.payment_status === 'paid' ? '✅ Pagamento confirmado' : '⏳ Pagamento pendente'}
                   </p>
                 </div>
               </div>
