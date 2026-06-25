@@ -3,10 +3,12 @@ import { useNavigate } from 'react-router-dom'
 import { Save, Trophy, DollarSign, Calendar, MapPin, Key, Settings } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../contexts/AuthContext'
+import { useGroupContext } from '../../contexts/GroupContext'
 import toast from 'react-hot-toast'
 
 export default function GroupCreate() {
   const { user } = useAuth()
+  const { refreshActiveGroup } = useGroupContext()
   const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
 
@@ -58,7 +60,7 @@ export default function GroupCreate() {
 
     setLoading(true)
     try {
-      const { data, error } = await supabase.from('groups').insert({
+      const { error } = await supabase.from('groups').insert({
         organizer_id: user.id,
         name: form.name,
         slug: form.slug,
@@ -82,7 +84,8 @@ export default function GroupCreate() {
         }
       } else {
         toast.success('Grupo criado com sucesso! 🎉')
-        navigate(`/dashboard/groups/${data.id}`)
+        await refreshActiveGroup(true)
+        navigate('/dashboard')
       }
     } finally {
       setLoading(false)
