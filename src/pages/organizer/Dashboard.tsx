@@ -115,7 +115,7 @@ export default function Dashboard() {
               {group.is_active && <span className="badge badge-verde" style={{ padding: '0.15rem 0.5rem', fontSize: '0.7rem' }}>Ativo</span>}
             </div>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '0.5rem' }}>/{group.slug}</p>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
               <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}><Users size={16} /> {participants} participantes</span>
               <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', color: 'var(--color-verde)' }}><Target size={16} /> {paid} pagos</span>
               <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', color: '#ef4444' }}>{participants - paid} pendente</span>
@@ -124,7 +124,7 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem' }}>
           <button className="btn btn-outline" onClick={() => copyLink(group.slug)}>
             {copiedSlug === group.slug ? <><Target size={18} /> Copiado!</> : <><Copy size={18} /> Copiar Link</>}
           </button>
@@ -220,7 +220,7 @@ export default function Dashboard() {
           <QrCode size={48} color="var(--text-muted)" />
         </div>
 
-        <div style={{ display: 'flex', gap: '0.75rem' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
           <button className="btn btn-gold" onClick={() => {
             if(group.pix_key) {
               navigator.clipboard.writeText(group.pix_key)
