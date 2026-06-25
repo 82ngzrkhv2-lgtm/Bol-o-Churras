@@ -16,7 +16,7 @@ interface GroupContextData {
   participantsList: Participant[]
   matchesList: Match[]
   loading: boolean
-  refreshActiveGroup: () => Promise<void>
+  refreshActiveGroup: (force?: boolean) => Promise<void>
 }
 
 const GroupContext = createContext<GroupContextData>({} as GroupContextData)

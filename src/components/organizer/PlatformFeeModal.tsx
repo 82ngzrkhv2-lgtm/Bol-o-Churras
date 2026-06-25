@@ -1,5 +1,5 @@
-import React, { useState, useRef } from 'react'
-import { X, Upload } from 'lucide-react'
+import React, { useState } from 'react'
+import { X } from 'lucide-react'
 import { QRCodeSVG } from 'qrcode.react'
 import { supabase } from '../../lib/supabase'
 import toast from 'react-hot-toast'
@@ -16,8 +16,16 @@ export default function PlatformFeeModal({ groupId, totalFee, onClose, onSuccess
   const [uploading, setUploading] = useState(false)
   const [pixPayload, setPixPayload] = useState('')
   const [pixImage, setPixImage] = useState('')
-  const [paymentId, setPaymentId] = useState<string | null>(null)
   const [loadingPix, setLoadingPix] = useState(true)
+
+  async function copyPixToClipboard() {
+    try {
+      await navigator.clipboard.writeText(pixPayload)
+      toast.success('Código PIX Copia e Cola copiado!')
+    } catch (err) {
+      toast.error('Falha ao copiar o código.')
+    }
+  }
 
   React.useEffect(() => {
     async function generatePix() {
@@ -32,7 +40,6 @@ export default function PlatformFeeModal({ groupId, totalFee, onClose, onSuccess
         if (data?.qrCode) {
           setPixPayload(data.qrCode)
           setPixImage(data.qrCodeBase64)
-          setPaymentId(data.paymentId)
         }
       } catch (err) {
         toast.error('Erro ao gerar PIX automático. Tente novamente.')
