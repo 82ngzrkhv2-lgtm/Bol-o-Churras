@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react'
+import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from './AuthContext'
 import type { Group, Participant, Match } from '../types'
@@ -27,6 +27,7 @@ export function GroupProvider({ children }: { children: React.ReactNode }) {
   const [participantsList, setParticipantsList] = useState<Participant[]>([])
   const [matchesList, setMatchesList] = useState<Match[]>([])
   const [loading, setLoading] = useState(true)
+  const abortRef = useRef<AbortController | null>(null)
 
   useEffect(() => {
     if (user) {
@@ -36,10 +37,13 @@ export function GroupProvider({ children }: { children: React.ReactNode }) {
     }
   }, [user])
 
-  async function refreshActiveGroup() {
+  const refreshActiveGroup = useCallback(async () => {
+    // Cancela request anterior se ainda pendente
+    if (abortRef.current) abortRef.current.abort()
+    abortRef.current = new AbortController()
+
     setLoading(true)
     try {
-      // Find the most recently created group for this user
       const { data: groups } = await supabase
         .from('groups')
         .select('*')
@@ -75,7 +79,6 @@ export function GroupProvider({ children }: { children: React.ReactNode }) {
 
       const paidCount = pList.filter(p => p.payment_status === 'paid').length
 
-      // predictions count
       const matchIds = mList.map(m => m.id)
       let predCount = 0
       if (matchIds.length > 0) {
@@ -92,12 +95,14 @@ export function GroupProvider({ children }: { children: React.ReactNode }) {
         predictions: predCount
       })
 
-    } catch (err) {
-      console.error('Error fetching active group:', err)
+    } catch (err: any) {
+      if (err?.name !== 'AbortError') {
+        console.error('Error fetching active group:', err)
+      }
     } finally {
       setLoading(false)
     }
-  }
+  }, [user?.id])
 
   return (
     <GroupContext.Provider value={{

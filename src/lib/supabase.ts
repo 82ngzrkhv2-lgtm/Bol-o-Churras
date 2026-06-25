@@ -11,8 +11,22 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     persistSession: true,
     autoRefreshToken: true,
+    detectSessionInUrl: true,
+  },
+  realtime: {
+    params: { eventsPerSecond: 2 },
+  },
+  global: {
+    fetch: (url, options = {}) => {
+      const controller = new AbortController()
+      const timeout = setTimeout(() => controller.abort(), 10000)
+      return fetch(url, { ...options, signal: controller.signal }).finally(() =>
+        clearTimeout(timeout)
+      )
+    },
   },
 })
+
 
 export type Database = {
   public: {

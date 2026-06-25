@@ -7,6 +7,7 @@ export interface Profile {
   avatar_url: string | null
   whatsapp?: string | null
   is_admin?: boolean
+  push_subscription?: any | null
   accepted_terms_at?: string | null
   created_at: string
 }

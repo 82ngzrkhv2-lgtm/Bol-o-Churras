@@ -59,7 +59,13 @@ export default defineConfig({
 
               const env = loadEnv();
               const supabaseUrl = env['VITE_SUPABASE_URL'];
-              const serviceRoleKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt2Z2V1eGZlcnJzeGlxeW9vdWVuIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MjMzNzAwMiwiZXhwIjoyMDk3OTEzMDAyfQ.4k6XbITDyfuCFfTWjN29qa-ARZc7chtIauewSsEfwFo";
+              const serviceRoleKey = env['SUPABASE_SERVICE_ROLE_KEY'];
+              if (!serviceRoleKey) {
+                res.statusCode = 500;
+                res.setHeader('Content-Type', 'application/json');
+                res.end(JSON.stringify({ error: 'SUPABASE_SERVICE_ROLE_KEY not set in .env (dev only)' }));
+                return;
+              }
 
               if (!supabaseUrl) {
                 res.statusCode = 500;
@@ -137,4 +143,22 @@ export default defineConfig({
       }
     }
   ],
+  build: {
+    target: 'esnext',
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules/react') || id.includes('node_modules/react-dom') || id.includes('node_modules/react-router-dom')) {
+            return 'react-vendor'
+          }
+          if (id.includes('node_modules/@supabase')) {
+            return 'supabase-vendor'
+          }
+          if (id.includes('node_modules/lucide-react') || id.includes('node_modules/react-hot-toast')) {
+            return 'ui-vendor'
+          }
+        },
+      },
+    },
+  },
 })

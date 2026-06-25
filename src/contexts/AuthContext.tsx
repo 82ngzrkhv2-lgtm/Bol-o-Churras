@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react'
+import React, { createContext, useContext, useEffect, useState, useCallback } from 'react'
 import type { Session, User } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
 import type { Profile } from '../types'
@@ -44,7 +44,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => subscription.unsubscribe()
   }, [])
 
-  async function loadProfile(userId: string) {
+  const loadProfile = useCallback(async (userId: string) => {
     try {
       const { data } = await supabase
         .from('profiles')
@@ -57,14 +57,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
-  async function signIn(email: string, password: string) {
+  const signIn = useCallback(async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({ email, password })
     return { error }
-  }
+  }, [])
 
-  async function signUp(email: string, password: string, fullName: string, whatsapp: string) {
+  const signUp = useCallback(async (email: string, password: string, fullName: string, whatsapp: string) => {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -78,7 +78,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     })
 
     if (!error && data.user) {
-      // Atualiza o perfil que foi inserido pelo trigger com o whatsapp e o aceite de termos
       await supabase.from('profiles')
         .update({
           full_name: fullName,
@@ -89,11 +88,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     return { error }
-  }
+  }, [])
 
-  async function signOut() {
+  const signOut = useCallback(async () => {
     await supabase.auth.signOut()
-  }
+  }, [])
 
   return (
     <AuthContext.Provider value={{ user, profile, session, loading, signIn, signUp, signOut }}>
