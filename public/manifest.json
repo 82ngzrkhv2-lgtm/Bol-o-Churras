@@ -1,0 +1,24 @@
+{
+  "name": "⚽ Bolão & Churras",
+  "short_name": "Bolão",
+  "description": "Organize seu bolão da Copa e churrasco com a galera",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#060b14",
+  "theme_color": "#009C3B",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "categories": ["sports", "social"],
+  "lang": "pt-BR"
+}
