@@ -44,3 +44,46 @@ function calcCRC16(payload: string): string {
   }
   return (crc & 0xFFFF).toString(16).toUpperCase().padStart(4, '0')
 }
+
+export function formatPixKey(rawKey: string, type: string): string {
+  const cleaned = rawKey.trim()
+  if (!cleaned) return ''
+
+  if (type === 'phone') {
+    const numbers = cleaned.replace(/\D/g, '')
+    if (numbers.length === 10 || numbers.length === 11) {
+      return `+55${numbers}`
+    }
+    if (numbers.length === 12 || numbers.length === 13) {
+      if (numbers.startsWith('55')) {
+        return `+${numbers}`
+      }
+    }
+    if (cleaned.startsWith('+')) {
+      return `+${cleaned.replace(/\D/g, '')}`
+    }
+    return `+${numbers}`
+  }
+
+  if (type === 'cpf' || type === 'cnpj') {
+    return cleaned.replace(/\D/g, '')
+  }
+
+  if (type === 'email') {
+    return cleaned.toLowerCase()
+  }
+
+  return cleaned
+}
+
+export function detectPixKeyType(key: string): 'cpf' | 'cnpj' | 'phone' | 'email' | 'random' {
+  const cleaned = key.trim()
+  if (cleaned.startsWith('+')) return 'phone'
+  if (cleaned.includes('@')) return 'email'
+  
+  const onlyNums = cleaned.replace(/\D/g, '')
+  if (onlyNums.length === 11) return 'cpf'
+  if (onlyNums.length === 14) return 'cnpj'
+  
+  return 'random'
+}

@@ -5,12 +5,14 @@ import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../contexts/AuthContext'
 import { useGroupContext } from '../../contexts/GroupContext'
 import toast from 'react-hot-toast'
+import { formatPixKey } from '../../lib/pix'
 
 export default function GroupCreate() {
   const { user } = useAuth()
   const { refreshActiveGroup } = useGroupContext()
   const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
+  const [pixKeyType, setPixKeyType] = useState<'cpf' | 'cnpj' | 'phone' | 'email' | 'random'>('phone')
 
   const [form, setForm] = useState({
     name: '',
@@ -68,7 +70,7 @@ export default function GroupCreate() {
         pool_entry_fee: form.pool_entry_fee,
         event_date: form.event_date || null,
         event_location: form.event_location || null,
-        pix_key: form.pix_key || null,
+        pix_key: form.pix_key ? formatPixKey(form.pix_key, pixKeyType) : null,
         scoring_exact: form.scoring_exact,
         scoring_winner: form.scoring_winner,
         points_exact: form.points_exact,
@@ -225,8 +227,25 @@ export default function GroupCreate() {
               </p>
             </div>
 
+            <div className="input-group">
+              <label className="input-label" htmlFor="pix_key_type">Tipo de Chave PIX</label>
+              <select
+                id="pix_key_type"
+                className="input"
+                value={pixKeyType}
+                onChange={(e) => setPixKeyType(e.target.value as any)}
+                style={{ marginBottom: '1rem' }}
+              >
+                <option value="phone">Celular (Telefone)</option>
+                <option value="cpf">CPF</option>
+                <option value="cnpj">CNPJ</option>
+                <option value="email">E-mail</option>
+                <option value="random">Chave Aleatória (EVP)</option>
+              </select>
+            </div>
+
             <div className="input-group" style={{ marginBottom: 0 }}>
-              <label className="input-label" htmlFor="pix_key">Chave PIX (Copia e Cola)</label>
+              <label className="input-label" htmlFor="pix_key">Chave PIX *</label>
               <div style={{ position: 'relative' }}>
                 <Key size={16} style={{ position: 'absolute', left: '0.7rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
                 <input
@@ -235,13 +254,24 @@ export default function GroupCreate() {
                   type="text"
                   className="input"
                   style={{ paddingLeft: '2.2rem' }}
-                  placeholder="CPF, e-mail, telefone ou chave aleatória"
+                  placeholder={
+                    pixKeyType === 'phone' ? 'Ex: (73) 98190-6662' :
+                    pixKeyType === 'cpf' ? 'Ex: 123.456.789-00' :
+                    pixKeyType === 'cnpj' ? 'Ex: 12.345.678/0001-00' :
+                    pixKeyType === 'email' ? 'Ex: seu-email@dominio.com' :
+                    'Ex: 123e4567-e89b-12d3-a456-426614174000'
+                  }
                   value={form.pix_key}
                   onChange={handleChange}
+                  required={form.pool_entry_fee > 0}
                 />
               </div>
               <p style={{ color: 'var(--text-muted)', fontSize: '0.78rem', marginTop: '0.3rem' }}>
-                Participantes vão ver essa chave para fazer o PIX
+                {pixKeyType === 'phone' && 'A chave de celular será formatada automaticamente no padrão internacional (+55).'}
+                {pixKeyType === 'cpf' && 'Apenas os números do CPF serão salvos.'}
+                {pixKeyType === 'cnpj' && 'Apenas os números do CNPJ serão salvos.'}
+                {pixKeyType === 'email' && 'O e-mail será salvo em letras minúsculas.'}
+                {pixKeyType === 'random' && 'Insira a chave aleatória completa incluindo os traços.'}
               </p>
             </div>
           </section>
