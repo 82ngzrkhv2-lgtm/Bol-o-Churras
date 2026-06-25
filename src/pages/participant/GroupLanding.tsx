@@ -22,6 +22,7 @@ export default function GroupLanding() {
   const [notFound, setNotFound] = useState(false)
   const [showIdentity, setShowIdentity] = useState(false)
   const [activeTab, setActiveTab] = useState<Tab>('ranking')
+  const [totalArrecadado, setTotalArrecadado] = useState(0)
 
   // Restaurar participante do localStorage
   useEffect(() => {
@@ -55,7 +56,11 @@ export default function GroupLanding() {
       ])
 
       setMatches(m || [])
-      computeRanking(parts || [], m || [])
+      const partsData = parts || []
+      const paidCount = partsData.filter(p => p.has_paid).length
+      setTotalArrecadado(paidCount * (g.pool_entry_fee || 0))
+      
+      computeRanking(partsData, m || [])
     } finally {
       setLoading(false)
     }
@@ -219,6 +224,12 @@ export default function GroupLanding() {
               <span className="badge badge-amarelo">
                 <DollarSign size={11} />
                 R$ {group.pool_entry_fee}/pessoa
+              </span>
+            )}
+            {group?.pool_entry_fee && group.pool_entry_fee > 0 && (
+              <span className="badge badge-verde">
+                <DollarSign size={11} />
+                Arrecadado: R$ {totalArrecadado.toFixed(2)}
               </span>
             )}
             {group?.event_date && (
