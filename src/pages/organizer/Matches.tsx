@@ -41,7 +41,7 @@ export default function Matches() {
       toast.success('Jogo adicionado com sucesso!')
       setShowManualMatchModal(false)
       setNewMatch({ home_team: '', away_team: '', match_date: '', stage: '' })
-      await refreshActiveGroup()
+      await refreshActiveGroup(true)
     } else {
       toast.error('Erro ao adicionar jogo')
     }
@@ -63,12 +63,14 @@ export default function Matches() {
     if (!error) {
       toast.success('Resultado salvo! Pontos calculados.')
       setResultMatch(null)
-      await refreshActiveGroup()
+      await refreshActiveGroup(true)
     } else {
       toast.error('Erro ao salvar resultado')
     }
     setIsProcessing(false)
   }
+
+  const hasMatchesStarted = matchesList.length > 0 && new Date(matchesList[0].match_date) <= new Date()
 
   return (
     <div className="flex flex-col gap-4">
@@ -77,13 +79,21 @@ export default function Matches() {
           <Calendar size={24} className="text-green-600" />
           Jogos ({matchesList.length})
         </h2>
-        <button
-          onClick={() => setShowManualMatchModal(true)}
-          className="btn btn-primary btn-sm flex items-center gap-1"
-        >
-          <Plus size={16} /> <span className="hidden sm:inline">Adicionar</span> Jogo
-        </button>
+        {!hasMatchesStarted && (
+          <button
+            onClick={() => setShowManualMatchModal(true)}
+            className="btn btn-primary btn-sm flex items-center gap-1"
+          >
+            <Plus size={16} /> <span className="hidden sm:inline">Adicionar</span> Jogo
+          </button>
+        )}
       </div>
+
+      {hasMatchesStarted && (
+        <div className="bg-yellow-50 text-yellow-800 p-3 rounded-lg text-sm border border-yellow-200">
+          <strong>Atenção:</strong> Como o primeiro jogo já começou (ou já passou da hora), a estrutura deste bolão está <strong>bloqueada</strong>. Você não pode mais adicionar jogos. Para uma nova rodada, crie um novo bolão.
+        </div>
+      )}
 
       {matchesList.length === 0 ? (
         <div className="card text-center p-10">

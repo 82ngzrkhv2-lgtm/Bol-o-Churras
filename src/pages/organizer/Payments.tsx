@@ -134,7 +134,7 @@ export default function Payments() {
           onClose={() => setShowFeeModal(false)}
           onSuccess={() => {
             setShowFeeModal(false)
-            if (group) refreshActiveGroup()
+            if (group) refreshActiveGroup(true)
           }}
         />
       )}

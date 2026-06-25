@@ -2,8 +2,8 @@ import React, { useState, useRef } from 'react'
 import { X, Upload } from 'lucide-react'
 import { QRCodeSVG } from 'qrcode.react'
 import { supabase } from '../../lib/supabase'
-import { generatePixPayload } from '../../lib/pix'
 import toast from 'react-hot-toast'
+import { RefreshCw } from 'lucide-react'
 
 interface Props {
   groupId: string
@@ -14,59 +14,54 @@ interface Props {
 
 export default function PlatformFeeModal({ groupId, totalFee, onClose, onSuccess }: Props) {
   const [uploading, setUploading] = useState(false)
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [pixPayload, setPixPayload] = useState('')
+  const [pixImage, setPixImage] = useState('')
+  const [paymentId, setPaymentId] = useState<string | null>(null)
+  const [loadingPix, setLoadingPix] = useState(true)
 
-  // Chave PIX e Nome extraídos das variáveis de ambiente (.env) para não expor no código fonte
-  const CREATOR_PIX_KEY = import.meta.env.VITE_PLATFORM_PIX_KEY || ''
-  const PIX_MERCHANT_NAME = import.meta.env.VITE_PLATFORM_PIX_NAME || 'Bolao e Churras'
-  const pixPayload = generatePixPayload(CREATOR_PIX_KEY, totalFee, PIX_MERCHANT_NAME)
-
-  async function copyPixToClipboard() {
-    try {
-      await navigator.clipboard.writeText(pixPayload)
-      toast.success('Código PIX Copia e Cola copiado!')
-    } catch (err) {
-      toast.error('Falha ao copiar o código.')
+  React.useEffect(() => {
+    async function generatePix() {
+      try {
+        const { data, error } = await supabase.functions.invoke('create-pix', {
+          body: { 
+            groupId, 
+            amount: totalFee 
+          }
+        })
+        if (error) throw error
+        if (data?.qrCode) {
+          setPixPayload(data.qrCode)
+          setPixImage(data.qrCodeBase64)
+          setPaymentId(data.paymentId)
+        }
+      } catch (err) {
+        toast.error('Erro ao gerar PIX automático. Tente novamente.')
+      } finally {
+        setLoadingPix(false)
+      }
     }
-  }
+    generatePix()
+  }, [groupId, totalFee])
 
-  async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (!file) return
-
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error('Arquivo muito grande. Máximo 5MB.')
-      return
-    }
-
+  async function checkPaymentStatus() {
     setUploading(true)
     try {
-      const fileExt = file.name.split('.').pop()
-      const fileName = `platform_fee_${groupId}_${Date.now()}.${fileExt}`
-      const filePath = `platform_fees/${fileName}`
-
-      const { error: uploadError } = await supabase.storage
-        .from('receipts') // Reaproveitando o bucket receipts
-        .upload(filePath, file, { cacheControl: '3600', upsert: false })
-
-      if (uploadError) throw uploadError
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('receipts')
-        .getPublicUrl(filePath)
-
-      const { error: updateError } = await supabase
+      const { data: group, error } = await supabase
         .from('groups')
-        .update({ platform_fee_paid: true, platform_fee_receipt_url: publicUrl })
+        .select('platform_fee_paid')
         .eq('id', groupId)
-
-      if (updateError) throw updateError
-
-      toast.success('Taxa repassada com sucesso! Funcionalidades liberadas.')
-      onSuccess()
-    } catch (error) {
-      console.error(error)
-      toast.error('Erro ao enviar comprovante.')
+        .single()
+        
+      if (error) throw error
+      
+      if (group.platform_fee_paid) {
+        toast.success('Pagamento confirmado com sucesso!')
+        onSuccess()
+      } else {
+        toast.error('Ainda não identificamos o pagamento. Pode levar alguns segundos.')
+      }
+    } catch (err) {
+      toast.error('Erro ao verificar pagamento.')
     } finally {
       setUploading(false)
     }
@@ -91,14 +86,26 @@ export default function PlatformFeeModal({ groupId, totalFee, onClose, onSuccess
           <p className="font-display font-black text-3xl text-emerald-900">R$ {totalFee.toFixed(2).replace('.', ',')}</p>
         </div>
 
-        <div className="flex justify-center bg-white p-4 rounded-xl mb-4">
-          <QRCodeSVG value={pixPayload} size={200} />
+        <div className="flex justify-center bg-white p-4 rounded-xl mb-4 min-h-[232px] items-center">
+          {loadingPix ? (
+            <div className="flex flex-col items-center text-gray-500">
+              <span className="animate-spin inline-block w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full mb-2" />
+              <p className="text-sm font-bold">Gerando PIX...</p>
+            </div>
+          ) : pixImage ? (
+            <img src={`data:image/png;base64,${pixImage}`} alt="QR Code PIX" className="w-[200px] h-[200px]" />
+          ) : pixPayload ? (
+            <QRCodeSVG value={pixPayload} size={200} />
+          ) : (
+            <p className="text-sm text-red-500 font-bold">Erro ao carregar PIX.</p>
+          )}
         </div>
         
         <div className="mb-6">
           <button 
             onClick={copyPixToClipboard}
-            className="w-full py-2 px-4 bg-gray-800 hover:bg-gray-700 text-emerald-400 border border-emerald-500/50 rounded-lg text-sm font-bold transition-colors"
+            disabled={!pixPayload}
+            className="w-full py-2 px-4 bg-gray-800 hover:bg-gray-700 text-emerald-400 border border-emerald-500/50 rounded-lg text-sm font-bold transition-colors disabled:opacity-50"
           >
             Copiar Código PIX (Copia e Cola)
           </button>
@@ -106,22 +113,19 @@ export default function PlatformFeeModal({ groupId, totalFee, onClose, onSuccess
 
         <div className="divider mb-6" />
 
-        <input
-          type="file"
-          accept="image/*,.pdf"
-          style={{ display: 'none' }}
-          ref={fileInputRef}
-          onChange={handleFileUpload}
-        />
+        <p className="text-xs text-center text-gray-500 mb-4">
+          O pagamento é identificado automaticamente. Após pagar, clique no botão abaixo para verificar.
+        </p>
+
         <button 
           className="btn btn-primary btn-full"
-          onClick={() => fileInputRef.current?.click()}
-          disabled={uploading}
+          onClick={checkPaymentStatus}
+          disabled={uploading || loadingPix}
         >
           {uploading ? (
-            <><span className="animate-spin inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full" /> Enviando...</>
+            <><span className="animate-spin inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full" /> Verificando...</>
           ) : (
-            <><Upload size={20} /> Anexar Comprovante do Repasse</>
+            <><RefreshCw size={20} /> Já paguei, verificar agora</>
           )}
         </button>
       </div>
