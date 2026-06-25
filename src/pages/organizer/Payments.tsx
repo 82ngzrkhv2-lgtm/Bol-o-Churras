@@ -20,7 +20,7 @@ export default function Payments() {
   const paidList = participantsList.filter(p => p.payment_status === 'paid')
   const totalArrecadado = paidList.length * fee
   
-  const PLATFORM_FEE = 1.50
+  const PLATFORM_FEE = 1.00
   const platformDebt = paidList.length * PLATFORM_FEE
 
   const filteredParticipants = participantsList.filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase()))
@@ -49,7 +49,7 @@ export default function Payments() {
               <p className="text-gray-400 font-display text-sm uppercase tracking-wider mb-1">Taxa da Plataforma</p>
               <h3 className="font-display font-bold text-2xl text-white">R$ {platformDebt.toFixed(2)}</h3>
               <p className="text-gray-400 text-sm mt-1">
-                Repasse pendente ({paidList.length} pagantes x R$ 1,50)
+                Repasse pendente ({paidList.length} pagantes x R$ 1,00)
               </p>
             </div>
             {group.platform_fee_paid ? (

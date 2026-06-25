@@ -82,13 +82,13 @@ export default function PlatformFeeModal({ groupId, totalFee, onClose, onSuccess
         <h3 className="font-display font-bold text-xl mb-2 text-center text-emerald-500">
           Acerto com a Plataforma
         </h3>
-        <p className="text-center text-sm text-gray-400 mb-6">
-          A taxa de <strong className="text-white">R$ 1,50</strong> por participante é dividida: você fica com <strong className="text-emerald-400">R$ 0,50</strong> e repassa apenas <strong className="text-white">R$ 1,00</strong> para a plataforma!
+        <p className="text-center text-sm text-gray-600 mb-6">
+          A taxa de <strong className="text-gray-900">R$ 1,50</strong> por participante é dividida: você fica com <strong className="text-emerald-600">R$ 0,50</strong> e repassa apenas <strong className="text-gray-900">R$ 1,00</strong> para a plataforma!
         </p>
 
-        <div className="bg-emerald-900/30 border border-emerald-500/30 rounded-xl p-4 text-center mb-6">
-          <p className="text-sm text-emerald-400 font-bold uppercase tracking-wider mb-1">Valor do Repasse</p>
-          <p className="font-display font-black text-3xl text-white">R$ {totalFee.toFixed(2).replace('.', ',')}</p>
+        <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-center mb-6">
+          <p className="text-sm text-emerald-700 font-bold uppercase tracking-wider mb-1">Valor do Repasse</p>
+          <p className="font-display font-black text-3xl text-emerald-900">R$ {totalFee.toFixed(2).replace('.', ',')}</p>
         </div>
 
         <div className="flex justify-center bg-white p-4 rounded-xl mb-4">
