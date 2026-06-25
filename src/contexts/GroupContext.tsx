@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState, useCallback, use
 import { supabase } from '../lib/supabase'
 import { useAuth } from './AuthContext'
 import type { Group, Participant, Match } from '../types'
+import { setCache, getCache } from '../hooks/useCache'
 
 interface ActiveGroupStats {
   participants: number
@@ -37,11 +38,32 @@ export function GroupProvider({ children }: { children: React.ReactNode }) {
     }
   }, [user])
 
-  const refreshActiveGroup = useCallback(async () => {
+  const refreshActiveGroup = useCallback(async (force = false) => {
     // Cancela request anterior se ainda pendente
     if (abortRef.current) abortRef.current.abort()
     abortRef.current = new AbortController()
 
+    const cacheKey = `group_ctx_${user?.id}`
+
+    // Verifica cache primeiro (exceto se force=true)
+    if (!force) {
+      const cached = getCache<{
+        group: Group
+        parts: Participant[]
+        mats: Match[]
+        paidCount: number
+        predCount: number
+      }>(cacheKey)
+
+      if (cached) {
+        setActiveGroup(cached.group)
+        setParticipantsList(cached.parts)
+        setMatchesList(cached.mats)
+        setStats({ participants: cached.parts.length, paid: cached.paidCount, predictions: cached.predCount })
+        setLoading(false)
+        return
+      }
+    }
     setLoading(true)
     try {
       const { data: groups } = await supabase
@@ -94,6 +116,9 @@ export function GroupProvider({ children }: { children: React.ReactNode }) {
         paid: paidCount,
         predictions: predCount
       })
+
+      // Salva no cache por 3 minutos
+      setCache(`group_ctx_${user?.id}`, { group, parts: pList, mats: mList, paidCount, predCount }, 3 * 60 * 1000)
 
     } catch (err: any) {
       if (err?.name !== 'AbortError') {

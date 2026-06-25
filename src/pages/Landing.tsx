@@ -1,15 +1,35 @@
-import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+
 import { CheckCircle2, Frown, FileSpreadsheet, UserX, Map, Shield, Users, Trophy, DollarSign, MessageSquare, PlayCircle, Star, ArrowRight, Clock, Bell, Home, Calendar } from 'lucide-react'
+import { useInView } from '../hooks/useInView'
+
+// Componente wrapper que renderiza filhos somente quando entra na viewport
+function LazySection({ children, className, id, style }: {
+  children: React.ReactNode
+  className?: string
+  id?: string
+  style?: React.CSSProperties
+}) {
+  const { ref, isInView } = useInView({ threshold: 0.05, rootMargin: '0px 0px -60px 0px' })
+  return (
+    <section
+      id={id}
+      ref={ref as React.RefObject<HTMLElement>}
+      className={className}
+      style={{
+        ...style,
+        opacity: isInView ? 1 : 0,
+        transform: isInView ? 'translateY(0)' : 'translateY(32px)',
+        transition: 'opacity 0.55s ease, transform 0.55s ease',
+      }}
+    >
+      {isInView ? children : null}
+    </section>
+  )
+}
 
 export default function Landing() {
-  const [mounted, setMounted] = useState(false)
 
-  useEffect(() => {
-    setMounted(true)
-  }, [])
-
-  if (!mounted) return null
 
   // Smooth scroll helper
   const scrollTo = (id: string) => {
@@ -298,47 +318,38 @@ export default function Landing() {
         </section>
 
         {/* --- DORES (Ainda organizando pelo WhatsApp?) --- */}
-        <section className="py-20 relative">
+        <LazySection className="py-20 relative">
           <div className="absolute inset-0 bg-white/40 -z-10" style={{ clipPath: 'ellipse(150% 100% at 50% 0%)' }}></div>
           <div className="max-w-7xl mx-auto px-4 md:px-8 text-center">
             <h2 className="text-3xl font-display font-bold text-gray-900 mb-2">Ainda organizando tudo pelo <span className="text-green-500">WhatsApp</span>?</h2>
             <p className="text-gray-500 mb-12">Isso gera dor de cabeça e faz você perder tempo.</p>
-            
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
               <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col items-center text-center hover:shadow-md transition-shadow">
-                <div className="w-16 h-16 rounded-full bg-red-100 text-red-500 flex items-center justify-center mb-4">
-                  <Frown size={32} />
-                </div>
+                <div className="w-16 h-16 rounded-full bg-red-100 text-red-500 flex items-center justify-center mb-4"><Frown size={32} /></div>
                 <h3 className="font-bold text-gray-900 mb-2">Cobranças esquecidas</h3>
                 <p className="text-sm text-gray-500">Você nunca sabe quem já pagou o PIX.</p>
               </div>
               <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col items-center text-center hover:shadow-md transition-shadow">
-                <div className="w-16 h-16 rounded-full bg-yellow-100 text-yellow-500 flex items-center justify-center mb-4">
-                  <FileSpreadsheet size={32} />
-                </div>
+                <div className="w-16 h-16 rounded-full bg-yellow-100 text-yellow-500 flex items-center justify-center mb-4"><FileSpreadsheet size={32} /></div>
                 <h3 className="font-bold text-gray-900 mb-2">Planilhas confusas</h3>
                 <p className="text-sm text-gray-500">Ninguém atualiza nada e sempre dá erro nos cálculos.</p>
               </div>
               <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col items-center text-center hover:shadow-md transition-shadow">
-                <div className="w-16 h-16 rounded-full bg-blue-100 text-blue-500 flex items-center justify-center mb-4">
-                  <UserX size={32} />
-                </div>
+                <div className="w-16 h-16 rounded-full bg-blue-100 text-blue-500 flex items-center justify-center mb-4"><UserX size={32} /></div>
                 <h3 className="font-bold text-gray-900 mb-2">Presença incerta</h3>
                 <p className="text-sm text-gray-500">Sempre aparece alguém dizendo que não vai mais de última hora.</p>
               </div>
               <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col items-center text-center hover:shadow-md transition-shadow">
-                <div className="w-16 h-16 rounded-full bg-green-100 text-green-500 flex items-center justify-center mb-4">
-                  <Map size={32} />
-                </div>
+                <div className="w-16 h-16 rounded-full bg-green-100 text-green-500 flex items-center justify-center mb-4"><Map size={32} /></div>
                 <h3 className="font-bold text-gray-900 mb-2">Palpites espalhados</h3>
                 <p className="text-sm text-gray-500">Cada um manda o resultado em um lugar diferente.</p>
               </div>
             </div>
           </div>
-        </section>
+        </LazySection>
 
         {/* --- A SOLUÇÃO (Tudo centralizado) --- */}
-        <section id="solucao" className="py-20 max-w-7xl mx-auto px-4 md:px-8 grid lg:grid-cols-12 gap-12 items-center">
+        <LazySection id="solucao" className="py-20 max-w-7xl mx-auto px-4 md:px-8 grid lg:grid-cols-12 gap-12 items-center">
           <div className="lg:col-span-5">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-50 text-green-700 text-xs font-bold uppercase tracking-wide mb-6">
               A SOLUÇÃO
@@ -400,10 +411,10 @@ export default function Landing() {
               />
             </div>
           </div>
-        </section>
+        </LazySection>
 
         {/* --- COMO FUNCIONA --- */}
-        <section id="como-funciona" className="py-20 bg-gray-50/50">
+        <LazySection id="como-funciona" className="py-20 bg-gray-50/50">
           <div className="max-w-7xl mx-auto px-4 md:px-8 text-center">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gray-200 text-gray-700 text-xs font-bold uppercase tracking-wide mb-4">
               COMO FUNCIONA
@@ -468,10 +479,10 @@ export default function Landing() {
               </div>
             </div>
           </div>
-        </section>
+        </LazySection>
 
         {/* --- BENEFÍCIOS --- */}
-        <section id="beneficios" className="py-24 max-w-7xl mx-auto px-4 md:px-8">
+        <LazySection id="beneficios" className="py-24 max-w-7xl mx-auto px-4 md:px-8">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-16">
             <div>
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-50 text-green-700 text-xs font-bold uppercase tracking-wide mb-4">
@@ -542,10 +553,10 @@ export default function Landing() {
               </div>
             </div>
           </div>
-        </section>
+        </LazySection>
 
         {/* --- DEPOIMENTOS --- */}
-        <section id="depoimentos" className="py-24 bg-gray-50/50">
+        <LazySection id="depoimentos" className="py-24 bg-gray-50/50">
           <div className="max-w-7xl mx-auto px-4 md:px-8">
             <div className="text-center mb-16">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-50 text-green-700 text-xs font-bold uppercase tracking-wide mb-4">
@@ -598,10 +609,10 @@ export default function Landing() {
               </div>
             </div>
           </div>
-        </section>
+        </LazySection>
 
         {/* --- BOTTOM CTA --- */}
-        <section className="max-w-6xl mx-auto px-4 md:px-8 py-10">
+        <LazySection className="max-w-6xl mx-auto px-4 md:px-8 py-10">
           <div className="bg-[#0B3B24] rounded-[2rem] overflow-hidden relative p-10 md:p-16 flex flex-col md:flex-row items-center justify-between text-white shadow-2xl">
             {/* Shapes decorativos do CTA */}
             <div className="absolute top-0 right-0 w-64 h-64 bg-green-500 rounded-full blur-[80px] opacity-20 -translate-y-1/2"></div>
@@ -622,7 +633,7 @@ export default function Landing() {
               <p className="text-center text-xs text-green-200/60 mt-3">Sem cartão de crédito. Simples assim.</p>
             </div>
           </div>
-        </section>
+        </LazySection>
 
       </main>
 
