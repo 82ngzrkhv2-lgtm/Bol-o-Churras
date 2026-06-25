@@ -1,77 +1,20 @@
-// public/sw.js — Service Worker com estratégias de cache otimizadas
+// public/sw.js — Service Worker (apenas Notificações Push, cache desativado)
 
-const CACHE_NAME = 'bolao-v2';
-const STATIC_ASSETS = [
-  '/',
-  '/logo.png',
-  '/favicon.svg',
-  '/manifest.json',
-];
+const CACHE_NAME = 'bolao-v3';
 
-// ─── INSTALL: pré-cache dos assets críticos ───────────────────────────────────
+// ─── INSTALL: ativação imediata ──────────────────────────────────────────────
 self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(STATIC_ASSETS))
-  );
   self.skipWaiting();
 });
 
-// ─── ACTIVATE: limpa caches antigos ──────────────────────────────────────────
+// ─── ACTIVATE: limpa absolutamente TODOS os caches antigos do navegador ────────
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
-      Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)))
+      Promise.all(keys.map((k) => caches.delete(k)))
     )
   );
   self.clients.claim();
-});
-
-// ─── FETCH: estratégia por tipo de request ────────────────────────────────────
-self.addEventListener('fetch', (event) => {
-  const { request } = event;
-  const url = new URL(request.url);
-
-  // Ignora requests não-GET e chrome-extension
-  if (request.method !== 'GET' || url.protocol === 'chrome-extension:') return;
-
-  // Network-First para Supabase e API Football (dados sempre frescos)
-  if (url.hostname.includes('supabase.co') || url.hostname.includes('api-sports.io')) {
-    event.respondWith(
-      fetch(request)
-        .then((res) => res)
-        .catch(() => caches.match(request))
-    );
-    return;
-  }
-
-  // Cache-First para assets estáticos buildados (hash no nome = imutáveis)
-  if (url.pathname.startsWith('/assets/')) {
-    event.respondWith(
-      caches.match(request).then((cached) => {
-        if (cached) return cached;
-        return fetch(request).then((res) => {
-          const clone = res.clone();
-          caches.open(CACHE_NAME).then((c) => c.put(request, clone));
-          return res;
-        });
-      })
-    );
-    return;
-  }
-
-  // Stale-While-Revalidate para demais requests (logo, manifest, etc.)
-  event.respondWith(
-    caches.match(request).then((cached) => {
-      const networkFetch = fetch(request).then((res) => {
-        if (res.ok) {
-          const clone = res.clone();
-          caches.open(CACHE_NAME).then((c) => c.put(request, clone));
-        }
-        return res;
-      });
-      return cached || networkFetch;
-    })
-  );
 });
 
 // ─── PUSH NOTIFICATIONS ───────────────────────────────────────────────────────

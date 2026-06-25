@@ -103,7 +103,7 @@ export default function IdentityModal({ groupName, onIdentify, onClose }: Props)
                 autoComplete="name"
                 className="input"
                 style={{ paddingLeft: '2.5rem', fontSize: '1rem' }}
-                placeholder="Como te chamam no grupo?"
+                placeholder="Como te chamam no evento?"
                 value={name}
                 onChange={e => setName(e.target.value)}
                 required

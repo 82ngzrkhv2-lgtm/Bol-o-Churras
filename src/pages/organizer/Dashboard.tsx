@@ -34,13 +34,13 @@ export default function Dashboard() {
       <div className="card text-center" style={{ padding: '3rem 1.5rem', marginTop: '2rem' }}>
         <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🏆</div>
         <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, marginBottom: '0.5rem' }}>
-          Nenhum grupo ainda
+          Nenhum evento ainda
         </h3>
         <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem', fontSize: '0.9rem' }}>
           Crie seu primeiro bolão e chame a galera!
         </p>
         <Link to="/dashboard/groups/new" className="btn btn-primary">
-          Criar primeiro grupo
+          Criar primeiro evento
         </Link>
       </div>
     )
@@ -129,7 +129,7 @@ export default function Dashboard() {
             {copiedSlug === group.slug ? <><Target size={18} /> Copiado!</> : <><Copy size={18} /> Copiar Link</>}
           </button>
           <Link to={`/dashboard/participants`} className="btn btn-primary" style={{ padding: '0.5rem 1rem' }}>
-            Gerenciar grupo <ChevronRight size={18} />
+            Gerenciar evento <ChevronRight size={18} />
           </Link>
           <a href={`/${group.slug}`} target="_blank" className="btn btn-ghost" style={{ padding: '0.5rem' }}>
             <ExternalLink size={20} />

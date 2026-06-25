@@ -69,7 +69,7 @@ export default function Landing() {
               Entrar
             </Link>
             <Link to="/register" className="px-4 py-2 sm:px-6 sm:py-2.5 rounded-full text-xs sm:text-sm font-semibold text-white bg-green-600 hover:bg-green-700 shadow-md shadow-green-600/20 transition-all hover:scale-105 flex items-center justify-center whitespace-nowrap">
-              <span className="hidden sm:inline">Criar grupo grátis</span>
+              <span className="hidden sm:inline">Criar evento grátis</span>
               <span className="sm:hidden">Criar grátis</span>
             </Link>
           </div>
@@ -95,7 +95,7 @@ export default function Landing() {
             
             <div className="flex flex-col sm:flex-row items-center gap-4 mb-16">
               <Link to="/register" className="w-full sm:w-auto px-8 py-4 rounded-full text-base font-bold text-white bg-green-600 hover:bg-green-700 shadow-xl shadow-green-600/20 transition-all hover:scale-105 flex items-center justify-center gap-2 whitespace-nowrap">
-                Criar meu grupo grátis <ArrowRight size={20} />
+                Criar meu evento grátis <ArrowRight size={20} />
               </Link>
               <button onClick={() => scrollTo('solucao')} className="w-full sm:w-auto px-8 py-4 rounded-full text-base font-bold text-gray-700 border border-gray-200 hover:bg-gray-50 transition-colors flex items-center justify-center gap-2 whitespace-nowrap">
                 Ver demonstração <PlayCircle size={20} className="text-green-600" />
@@ -109,7 +109,7 @@ export default function Landing() {
                 </div>
                 <div>
                   <div className="font-bold text-gray-900 text-lg leading-tight">+1.200</div>
-                  <div className="text-xs text-gray-500">grupos criados</div>
+                  <div className="text-xs text-gray-500">eventos criados</div>
                 </div>
               </div>
               <div className="flex items-center gap-3">
@@ -203,7 +203,7 @@ export default function Landing() {
                   {/* Mock Header */}
                   <header className="h-8 bg-white border-b border-gray-100 flex items-center justify-between px-3">
                     <div className="flex items-center gap-1.5">
-                      <p className="text-[9px] font-bold text-gray-900">Painel do Grupo</p>
+                      <p className="text-[9px] font-bold text-gray-900">Painel do Evento</p>
                       <span className="bg-green-100 text-green-700 text-[6px] px-1 py-0.2 rounded font-bold uppercase">Ativo</span>
                     </div>
                     <div className="flex items-center gap-2">
@@ -358,7 +358,7 @@ export default function Landing() {
               Tudo centralizado em um <span className="text-green-600">único link</span>
             </h2>
             <p className="text-lg text-gray-500 mb-10">
-              Crie seu grupo, compartilhe o link e deixe que o Bolão&Churras organiza o resto para você. Sem esforço.
+              Crie seu evento, compartilhe o link e deixe que o Bolão&Churras organiza o resto para você. Sem esforço.
             </p>
             
             <div className="grid sm:grid-cols-2 gap-8">
@@ -434,7 +434,7 @@ export default function Landing() {
                 <div className="w-16 h-16 rounded-full bg-white shadow-sm flex items-center justify-center text-green-600 mb-4">
                   <Users size={28} />
                 </div>
-                <h4 className="font-bold text-gray-900 mb-2">Crie seu grupo</h4>
+                <h4 className="font-bold text-gray-900 mb-2">Crie seu evento</h4>
                 <p className="text-sm text-gray-500">Configure as regras, valor por pessoa e tipo do evento.</p>
               </div>
 
@@ -493,7 +493,7 @@ export default function Landing() {
               </h2>
             </div>
             <Link to="/register" className="px-6 py-3 rounded-full text-sm font-bold text-white bg-green-600 hover:bg-green-700 shadow-md transition-colors flex items-center gap-2 shrink-0">
-              Criar meu grupo grátis <ArrowRight size={18} />
+              Criar meu evento grátis <ArrowRight size={18} />
             </Link>
           </div>
 
@@ -582,7 +582,7 @@ export default function Landing() {
                 </div>
               </div>
               <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
-                <p className="text-gray-600 italic mb-6">"O ranking virou a parte mais divertida do grupo. A galera compete e interage muito mais!"</p>
+                <p className="text-gray-600 italic mb-6">"O ranking virou a parte mais divertida do evento. A galera compete e interage muito mais!"</p>
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 rounded-full bg-gray-200"></div>
                   <div>
@@ -628,7 +628,7 @@ export default function Landing() {
             
             <div className="relative z-10 w-full md:w-auto">
               <Link to="/register" className="w-full md:w-auto px-8 py-5 rounded-full text-base font-bold text-gray-900 bg-yellow-400 hover:bg-yellow-300 shadow-xl transition-all hover:scale-105 flex items-center justify-center gap-2">
-                Criar meu grupo grátis <ArrowRight size={20} />
+                Criar meu evento grátis <ArrowRight size={20} />
               </Link>
               <p className="text-center text-xs text-green-200/60 mt-3">Sem cartão de crédito. Simples assim.</p>
             </div>

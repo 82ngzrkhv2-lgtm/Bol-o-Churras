@@ -149,7 +149,7 @@ export default function AdminDashboard() {
             <div className="card p-4">
               <div className="flex items-center gap-2 text-gray-500 mb-2">
                 <Trophy size={16} />
-                <span className="text-sm font-semibold">Grupos Criados</span>
+                <span className="text-sm font-semibold">Eventos Criados</span>
               </div>
               <p className="text-2xl font-bold text-gray-900">{stats?.totalGroups || 0}</p>
             </div>
@@ -195,7 +195,7 @@ export default function AdminDashboard() {
                     <th className="p-4 font-medium">Nome</th>
                     <th className="p-4 font-medium">E-mail</th>
                     <th className="p-4 font-medium">WhatsApp</th>
-                    <th className="p-4 font-medium">Grupos</th>
+                    <th className="p-4 font-medium">Eventos</th>
                     <th className="p-4 font-medium">Pagos</th>
                     <th className="p-4 font-medium">Pendentes</th>
                     <th className="p-4 font-medium">Criado em</th>

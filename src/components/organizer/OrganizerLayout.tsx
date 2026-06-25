@@ -257,7 +257,7 @@ function OrganizerLayoutInner() {
             </div>
             <Link to="/dashboard/groups/new" className="hidden sm:flex btn btn-primary" style={{ gap: '0.4rem', padding: '0.4rem 1rem' }}>
               <Plus size={16} />
-              Novo Grupo
+              Novo Evento
             </Link>
           </div>
         </header>

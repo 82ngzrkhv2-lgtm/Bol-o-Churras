@@ -18,7 +18,7 @@ export default function Settings() {
   }
 
   if (!group) {
-    return <div className="p-8 text-center text-gray-500">Nenhum grupo ativo selecionado.</div>
+    return <div className="p-8 text-center text-gray-500">Nenhum evento ativo selecionado.</div>
   }
 
   async function saveSettings(e: React.FormEvent) {
@@ -54,7 +54,7 @@ export default function Settings() {
       <div className="card p-6">
         <form onSubmit={saveSettings} className="flex flex-col gap-4">
           <div>
-            <label className="input-label">Nome do Grupo</label>
+            <label className="input-label">Nome do Evento</label>
             <input
               type="text"
               required

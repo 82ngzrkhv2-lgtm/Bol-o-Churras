@@ -19,7 +19,7 @@ export default function EventInfo() {
   }
 
   if (!group) {
-    return <div className="p-8 text-center text-gray-500">Nenhum grupo ativo selecionado.</div>
+    return <div className="p-8 text-center text-gray-500">Nenhum evento ativo selecionado.</div>
   }
 
   function startEditing() {

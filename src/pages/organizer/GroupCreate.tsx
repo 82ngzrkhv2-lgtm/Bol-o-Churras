@@ -80,10 +80,10 @@ export default function GroupCreate() {
         if (error.code === '23505') {
           toast.error('Esse slug já está em uso. Tente outro.')
         } else {
-          toast.error('Erro ao criar grupo: ' + error.message)
+          toast.error('Erro ao criar evento: ' + error.message)
         }
       } else {
-        toast.success('Grupo criado com sucesso! 🎉')
+        toast.success('Evento criado com sucesso! 🎉')
         await refreshActiveGroup(true)
         navigate('/dashboard')
       }
@@ -96,15 +96,15 @@ export default function GroupCreate() {
     <div className="container-dashboard" style={{ padding: '1.5rem', maxWidth: 700 }}>
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
 
-          {/* Informações do Grupo */}
+          {/* Informações do Evento */}
           <section className="card" style={{ padding: '1.25rem' }}>
             <h2 className="flex items-center gap-2 mb-4" style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1rem' }}>
               <Trophy size={18} style={{ color: 'var(--color-verde)' }} />
-              INFORMAÇÕES DO GRUPO
+              INFORMAÇÕES DO EVENTO
             </h2>
 
             <div className="input-group">
-              <label className="input-label" htmlFor="name">Nome do Grupo *</label>
+              <label className="input-label" htmlFor="name">Nome do Evento *</label>
               <input
                 id="name"
                 type="text"
@@ -324,12 +324,12 @@ export default function GroupCreate() {
             {loading ? (
               <>
                 <span className="animate-spin inline-block w-5 h-5 border-2 border-white border-t-transparent rounded-full" />
-                Criando grupo...
+                Criando evento...
               </>
             ) : (
               <>
                 <Save size={20} />
-                Criar Grupo e Gerar Link
+                Criar Evento e Gerar Link
               </>
             )}
           </button>
