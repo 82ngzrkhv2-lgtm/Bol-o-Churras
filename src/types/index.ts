@@ -8,6 +8,7 @@ export interface Profile {
   whatsapp?: string | null
   is_admin?: boolean
   push_subscription?: any | null
+  is_blocked?: boolean
   accepted_terms_at?: string | null
   created_at: string
 }

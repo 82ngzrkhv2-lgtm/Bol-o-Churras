@@ -51,6 +51,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .select('*')
         .eq('id', userId)
         .single()
+        
+      if (data?.is_blocked) {
+        await supabase.auth.signOut()
+        setProfile(null)
+        setUser(null)
+        setSession(null)
+        // Ensure toast is imported if we add toast here. Let's just alert for simplicity or use toast.
+        alert('Sua conta foi suspensa. Contate o administrador.')
+        return
+      }
+
       setProfile(data)
     } catch {
       setProfile(null)

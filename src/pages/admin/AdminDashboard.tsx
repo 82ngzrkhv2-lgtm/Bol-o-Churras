@@ -107,6 +107,17 @@ export default function AdminDashboard() {
     }
   }
 
+  async function toggleBlock(orgId: string, currentStatus: boolean) {
+    if (!confirm(currentStatus ? 'Desbloquear usuário?' : 'Bloquear usuário e impedir acesso ao sistema?')) return
+    const { error } = await supabase.from('profiles').update({ is_blocked: !currentStatus }).eq('id', orgId)
+    if (error) {
+      toast.error('Erro ao alterar status do usuário.')
+    } else {
+      toast.success(currentStatus ? 'Usuário desbloqueado!' : 'Usuário bloqueado!')
+      loadAdminData()
+    }
+  }
+
   if (authLoading) return <div>Carregando...</div>
   if (!isSuperAdmin) return <Navigate to="/dashboard" replace />
 
@@ -188,6 +199,7 @@ export default function AdminDashboard() {
                     <th className="p-4 font-medium">Pagos</th>
                     <th className="p-4 font-medium">Pendentes</th>
                     <th className="p-4 font-medium">Criado em</th>
+                    <th className="p-4 font-medium">Ações</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100 text-gray-700">
@@ -201,6 +213,14 @@ export default function AdminDashboard() {
                       <td className="p-4 text-yellow-600 font-semibold">{org.fee_status.pending}</td>
                       <td className="p-4 text-xs text-gray-500">
                         {new Date(org.created_at).toLocaleDateString('pt-BR')}
+                      </td>
+                      <td className="p-4">
+                        <button
+                          onClick={() => toggleBlock(org.id, org.is_blocked || false)}
+                          className={`px-3 py-1 text-xs font-bold rounded-lg border transition-colors ${org.is_blocked ? 'bg-red-50 text-red-600 border-red-200 hover:bg-red-100' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'}`}
+                        >
+                          {org.is_blocked ? 'Desbloquear' : 'Bloquear'}
+                        </button>
                       </td>
                     </tr>
                   ))}

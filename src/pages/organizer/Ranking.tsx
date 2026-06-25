@@ -73,7 +73,12 @@ export default function Ranking() {
 
   const paidList = participantsList.filter(p => p.payment_status === 'paid')
   const platformDebt = paidList.length * 1.00
-  const isBlocked = platformDebt > 0 && !group.platform_fee_paid
+  
+  // Encerramento dos palpites: considerado quando o primeiro jogo começa
+  const hasMatchesStarted = matchesList.length > 0 && new Date(matchesList[0].match_date) <= new Date()
+  
+  const isFeeUnpaid = platformDebt > 0 && !group.platform_fee_paid
+  const isBlocked = !hasMatchesStarted || isFeeUnpaid
 
   const exactWinners = ranking.filter(r => r.exact_scores > 0).sort((a, b) => b.exact_scores - a.exact_scores)
   const hasFinishedMatches = matchesList.some(m => m.status === 'finished')
@@ -95,7 +100,9 @@ export default function Ranking() {
             </div>
             <h3 className="font-display font-bold text-xl mb-2 text-gray-800">Ranking Bloqueado</h3>
             <p className="text-gray-600 text-sm mb-4">
-              Faça o repasse da Taxa da Plataforma (R$ {platformDebt.toFixed(2).replace('.', ',')}) na aba Financeiro para liberar os resultados finais.
+              {!hasMatchesStarted 
+                ? 'O ranking será liberado após o início do primeiro jogo (encerramento dos palpites) e pagamento da taxa.' 
+                : `Faça o repasse da Taxa da Plataforma (R$ ${platformDebt.toFixed(2).replace('.', ',')}) na aba Financeiro para liberar os resultados finais.`}
             </p>
           </div>
         )}

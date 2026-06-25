@@ -4,7 +4,7 @@ import { useState } from 'react'
 import PlatformFeeModal from '../../components/organizer/PlatformFeeModal'
 
 export default function Payments() {
-  const { activeGroup: group, participantsList, loading, refreshActiveGroup } = useGroupContext()
+  const { activeGroup: group, participantsList, matchesList, loading, refreshActiveGroup } = useGroupContext()
   const [searchTerm, setSearchTerm] = useState('')
   const [showFeeModal, setShowFeeModal] = useState(false)
 
@@ -22,6 +22,8 @@ export default function Payments() {
   
   const PLATFORM_FEE = 1.00
   const platformDebt = paidList.length * PLATFORM_FEE
+
+  const hasMatchesStarted = matchesList.length > 0 && new Date(matchesList[0].match_date) <= new Date()
 
   const filteredParticipants = participantsList.filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase()))
 
@@ -58,9 +60,20 @@ export default function Payments() {
                 Taxa Paga
               </div>
             ) : (
-              <button className="btn btn-primary" onClick={() => setShowFeeModal(true)}>
-                Fazer Repasse
-              </button>
+              <div className="flex flex-col items-end gap-1">
+                <button 
+                  className="btn btn-primary" 
+                  onClick={() => setShowFeeModal(true)}
+                  disabled={!hasMatchesStarted}
+                >
+                  Fazer Repasse
+                </button>
+                {!hasMatchesStarted && (
+                  <span className="text-xs text-yellow-500 font-bold max-w-[200px] text-right">
+                    Aguarde o início do primeiro jogo para fazer o repasse e liberar o ranking.
+                  </span>
+                )}
+              </div>
             )}
           </div>
         </div>

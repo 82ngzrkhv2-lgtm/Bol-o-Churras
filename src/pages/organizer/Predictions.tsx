@@ -57,7 +57,12 @@ export default function Predictions() {
 
   const paidList = participantsList.filter((p: any) => p.payment_status === 'paid')
   const platformDebt = paidList.length * 1.00
-  const isBlocked = platformDebt > 0 && !group.platform_fee_paid
+  
+  // Encerramento dos palpites: considerado quando o primeiro jogo começa
+  const hasMatchesStarted = matchesList.length > 0 && new Date(matchesList[0].match_date) <= new Date()
+  
+  const isFeeUnpaid = platformDebt > 0 && !group.platform_fee_paid
+  const isBlocked = !hasMatchesStarted || isFeeUnpaid
 
   if (isBlocked) {
     return (
@@ -75,7 +80,9 @@ export default function Predictions() {
             </div>
             <h3 className="font-display font-bold text-xl mb-2 text-gray-800">Visão Bloqueada</h3>
             <p className="text-gray-600 text-sm mb-4 max-w-md mx-auto">
-              Para ver os palpites de cada participante e a ordem de chegada, faça o repasse da Taxa da Plataforma (R$ {platformDebt.toFixed(2).replace('.', ',')}) na aba Financeiro.
+              {!hasMatchesStarted 
+                ? 'Os palpites da galera serão liberados após o início do primeiro jogo (encerramento dos palpites) e pagamento da taxa.' 
+                : `Para ver os palpites de cada participante e a ordem de chegada, faça o repasse da Taxa da Plataforma (R$ ${platformDebt.toFixed(2).replace('.', ',')}) na aba Financeiro.`}
             </p>
           </div>
         </div>
