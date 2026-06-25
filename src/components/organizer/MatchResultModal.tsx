@@ -9,13 +9,13 @@ interface Props {
 }
 
 export default function MatchResultModal({ match, onClose, onSave }: Props) {
-  const [homeScore, setHomeScore] = useState<number>(match.home_score ?? 0)
-  const [awayScore, setAwayScore] = useState<number>(match.away_score ?? 0)
+  const [homeScore, setHomeScore] = useState<number | ''>(match.home_score ?? '')
+  const [awayScore, setAwayScore] = useState<number | ''>(match.away_score ?? '')
   const [saving, setSaving] = useState(false)
 
   async function handleSave() {
     setSaving(true)
-    await onSave(match.id, homeScore, awayScore)
+    await onSave(match.id, homeScore === '' ? 0 : homeScore, awayScore === '' ? 0 : awayScore)
     setSaving(false)
   }
 
@@ -54,7 +54,10 @@ export default function MatchResultModal({ match, onClose, onSave }: Props) {
               className="score-input"
               style={{ width: '100%', maxWidth: 80, margin: '0 auto', display: 'block' }}
               value={homeScore}
-              onChange={e => setHomeScore(Math.max(0, parseInt(e.target.value) || 0))}
+              onChange={e => {
+                const val = e.target.value
+                setHomeScore(val === '' ? '' : Math.max(0, parseInt(val) || 0))
+              }}
               min={0}
               max={20}
             />
@@ -73,7 +76,10 @@ export default function MatchResultModal({ match, onClose, onSave }: Props) {
               className="score-input"
               style={{ width: '100%', maxWidth: 80, margin: '0 auto', display: 'block' }}
               value={awayScore}
-              onChange={e => setAwayScore(Math.max(0, parseInt(e.target.value) || 0))}
+              onChange={e => {
+                const val = e.target.value
+                setAwayScore(val === '' ? '' : Math.max(0, parseInt(val) || 0))
+              }}
               min={0}
               max={20}
             />
