@@ -1,6 +1,3 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1'
-
 const MP_ACCESS_TOKEN = Deno.env.get('MP_ACCESS_TOKEN')
 
 const corsHeaders = {
@@ -8,7 +5,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-serve(async (req) => {
+Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
@@ -44,7 +41,7 @@ serve(async (req) => {
 
     if (!mpResponse.ok) {
       console.error('Mercado Pago Error:', mpData)
-      throw new Error('Erro ao gerar PIX no Mercado Pago')
+      throw new Error(mpData.message || 'Erro ao gerar PIX no Mercado Pago')
     }
 
     const qrCode = mpData.point_of_interaction?.transaction_data?.qr_code
