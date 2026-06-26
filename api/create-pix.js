@@ -22,7 +22,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { groupId, amount, description, payerEmail } = req.body || {};
+    const { groupId, amount, description, payerEmail, deviceId } = req.body || {};
 
     const MP_ACCESS_TOKEN = process.env.MP_ACCESS_TOKEN;
 
@@ -50,7 +50,19 @@ export default async function handler(req, res) {
         payer: {
           email: payerEmail || 'nao-informado@bolaoechurras.com.br'
         },
-        external_reference: groupId
+        external_reference: groupId,
+        // Device ID obrigatório pelo Mercado Pago (anti-fraude / MercadoPago.JS V2)
+        ...(deviceId ? { device_id: deviceId } : {}),
+        items: [
+          {
+            id: groupId || 'bolao-churras',
+            title: description || 'Taxa Bolão e Churras',
+            description: description || 'Pagamento de taxa de organização do bolão e churras via plataforma BolãoeChurras',
+            quantity: 1,
+            unit_price: amount,
+            currency_id: 'BRL'
+          }
+        ]
       })
     });
 

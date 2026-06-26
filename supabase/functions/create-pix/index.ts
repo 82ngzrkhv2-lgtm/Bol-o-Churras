@@ -11,7 +11,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { groupId, amount, description, payerEmail } = await req.json()
+    const { groupId, amount, description, payerEmail, deviceId } = await req.json()
 
     if (!MP_ACCESS_TOKEN) {
       throw new Error('MP_ACCESS_TOKEN not configured')
@@ -28,12 +28,24 @@ Deno.serve(async (req) => {
       },
       body: JSON.stringify({
         transaction_amount: amount,
-        description: description || 'Taxa Bolão',
+        description: description || 'Taxa Bolão e Churras',
         payment_method_id: 'pix',
         payer: {
           email: payerEmail || 'nao-informado@bolaoechurras.com.br'
         },
-        external_reference: groupId
+        external_reference: groupId,
+        // Device ID obrigatório pelo Mercado Pago (anti-fraude)
+        ...(deviceId ? { device_id: deviceId } : {}),
+        items: [
+          {
+            id: groupId || 'bolao-churras',
+            title: description || 'Taxa Bolão e Churras',
+            description: description || 'Pagamento de taxa de organização do bolão e churras via plataforma BolãoeChurras',
+            quantity: 1,
+            unit_price: amount,
+            currency_id: 'BRL'
+          }
+        ]
       })
     })
 

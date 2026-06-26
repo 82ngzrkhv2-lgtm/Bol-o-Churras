@@ -30,6 +30,9 @@ export default function PlatformFeeModal({ groupId, totalFee, onClose, onSuccess
   React.useEffect(() => {
     async function generatePix() {
       try {
+        // Captura o Device ID gerado pelo MercadoPago.JS V2 (anti-fraude obrigatório)
+        const deviceId = (window as any).MP_DEVICE_SESSION_ID ?? undefined
+
         const response = await fetch('/api/create-pix', {
           method: 'POST',
           headers: {
@@ -37,7 +40,8 @@ export default function PlatformFeeModal({ groupId, totalFee, onClose, onSuccess
           },
           body: JSON.stringify({ 
             groupId, 
-            amount: totalFee 
+            amount: totalFee,
+            deviceId
           })
         })
         if (!response.ok) {

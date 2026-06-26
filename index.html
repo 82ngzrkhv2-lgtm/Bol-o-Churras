@@ -26,6 +26,9 @@
     <link rel="preconnect" href="https://kvgeuxferrsxiqyoouen.supabase.co">
     <link rel="dns-prefetch" href="https://kvgeuxferrsxiqyoouen.supabase.co">
     <link rel="dns-prefetch" href="https://v3.football.api-sports.io">
+    <!-- Mercado Pago: Device Fingerprint (anti-fraude) -->
+    <link rel="preconnect" href="https://sdk.mercadopago.com">
+    <meta name="mp-public-key" content="%VITE_MP_PUBLIC_KEY%">
 
 
     <title>⚽ Bolão & Churras</title>
@@ -33,5 +36,23 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+
+    <!-- MercadoPago.JS V2 — Device Fingerprint obrigatório (anti-fraude) -->
+    <script src="https://sdk.mercadopago.com/js/v2"></script>
+    <script>
+      (function () {
+        try {
+          var mpPublicKey = document.querySelector('meta[name="mp-public-key"]')?.content;
+          if (mpPublicKey && typeof MercadoPago !== 'undefined') {
+            var mp = new MercadoPago(mpPublicKey);
+            // O SDK grava o fingerprint automaticamente em cookie/session.
+            // Expondo via window para que os componentes React possam ler.
+            window.MP_DEVICE_SESSION_ID = mp.deviceFingerprint?.();
+          }
+        } catch (e) {
+          console.warn('[MP] Device fingerprint init failed:', e);
+        }
+      })();
+    </script>
   </body>
 </html>
