@@ -30,16 +30,25 @@ export default function PlatformFeeModal({ groupId, totalFee, onClose, onSuccess
   React.useEffect(() => {
     async function generatePix() {
       try {
-        const { data, error } = await supabase.functions.invoke('create-pix', {
-          body: { 
+        const response = await fetch('/api/create-pix', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ 
             groupId, 
             amount: totalFee 
-          }
+          })
         })
-        if (error) throw error
+        if (!response.ok) {
+          throw new Error('Falha na resposta do servidor Vercel')
+        }
+        const data = await response.json()
         if (data?.qrCode) {
           setPixPayload(data.qrCode)
           setPixImage(data.qrCodeBase64)
+        } else if (data?.error) {
+          throw new Error(data.error)
         }
       } catch (err) {
         toast.error('Erro ao gerar PIX automático. Tente novamente.')
