@@ -8,9 +8,10 @@ import IdentityModal from '../../components/participant/IdentityModal'
 import PredictionsView from '../../components/participant/PredictionsView'
 import RankingView from '../../components/participant/RankingView'
 import EventRSVP from '../../components/participant/EventRSVP'
+import ItemsView from '../../components/participant/ItemsView'
 import toast from 'react-hot-toast'
 
-type Tab = 'ranking' | 'palpites' | 'evento'
+type Tab = 'ranking' | 'palpites' | 'evento' | 'itens'
 
 export default function GroupLanding() {
   const { slug } = useParams<{ slug: string }>()
@@ -299,19 +300,20 @@ export default function GroupLanding() {
         position: 'sticky', top: 0, zIndex: 40,
       }}>
         <div className="container-app">
-          <div className="flex">
-            {(['ranking', 'palpites', 'evento'] as Tab[]).map(tab => (
+          <div className="flex" style={{ overflowX: 'auto', scrollbarWidth: 'none' }}>
+            {(['ranking', 'palpites', 'evento', 'itens'] as Tab[]).map(tab => (
               <button
                 key={tab}
                 onClick={() => {
-                  if ((tab === 'palpites' || tab === 'evento') && !participant) {
+                  if ((tab === 'palpites' || tab === 'evento' || tab === 'itens') && !participant) {
                     setShowIdentity(true)
                     return
                   }
                   setActiveTab(tab)
                 }}
                 style={{
-                  flex: 1,
+                  flex: '0 0 auto',
+                  minWidth: '25%',
                   padding: '0.9rem 0.5rem',
                   fontFamily: 'var(--font-display)',
                   fontWeight: 700,
@@ -326,7 +328,7 @@ export default function GroupLanding() {
                   transition: 'var(--transition-fast)',
                 }}
               >
-                {tab === 'ranking' ? '🏆 Ranking' : tab === 'palpites' ? '⚽ Palpites' : '🍖 Evento'}
+                {tab === 'ranking' ? '🏆 Ranking' : tab === 'palpites' ? '⚽ Palpites' : tab === 'evento' ? '🍖 Evento' : '🛒 Itens'}
               </button>
             ))}
           </div>
@@ -361,6 +363,13 @@ export default function GroupLanding() {
                 localStorage.setItem(`bolao-participant-${slug}`, JSON.stringify(data))
               }
             }}
+          />
+        )}
+        {activeTab === 'itens' && participant && group && (
+          <ItemsView
+            group={group}
+            participant={participant}
+            onUpdate={loadGroup}
           />
         )}
       </div>

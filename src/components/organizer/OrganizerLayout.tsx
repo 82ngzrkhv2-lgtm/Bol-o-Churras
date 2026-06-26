@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link, useLocation, Outlet } from 'react-router-dom'
 import { 
   Home, Users, Trophy, Calendar, DollarSign, Target, Settings,
-  Bell, Plus, ChevronDown, X, MoreHorizontal
+  Bell, Plus, ChevronDown, X, MoreHorizontal, ShoppingBag
 } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 import { GroupProvider } from '../../contexts/GroupContext'
@@ -127,6 +127,7 @@ function OrganizerLayoutInner() {
     { label: 'Pagamentos', icon: <DollarSign size={20} />, path: '/dashboard/payments' },
     { label: 'Ranking', icon: <Trophy size={20} />, path: '/dashboard/ranking' },
     { label: 'Palpites', icon: <Target size={20} />, path: '/dashboard/predictions' },
+    { label: 'Churras', icon: <ShoppingBag size={20} />, path: '/dashboard/churras' },
     { label: 'Configurações', icon: <Settings size={20} />, path: '/dashboard/settings' },
   ]
 

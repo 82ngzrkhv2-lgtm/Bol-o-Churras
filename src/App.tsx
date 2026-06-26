@@ -16,6 +16,7 @@ const EventInfo = lazy(() => import('./pages/organizer/EventInfo'))
 const Ranking = lazy(() => import('./pages/organizer/Ranking'))
 const Predictions = lazy(() => import('./pages/organizer/Predictions'))
 const Settings = lazy(() => import('./pages/organizer/Settings'))
+const Churras = lazy(() => import('./pages/organizer/Churras'))
 const Terms = lazy(() => import('./pages/Terms'))
 const Privacy = lazy(() => import('./pages/Privacy'))
 const GroupLanding = lazy(() => import('./pages/participant/GroupLanding'))
@@ -67,6 +68,7 @@ export default function App() {
               <Route path="ranking" element={<Ranking />} />
               <Route path="predictions" element={<Predictions />} />
               <Route path="settings" element={<Settings />} />
+              <Route path="churras" element={<Churras />} />
             </Route>
 
             {/* Rota do Participante — Link Público */}
