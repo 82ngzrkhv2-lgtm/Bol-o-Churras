@@ -3,6 +3,8 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 import { AuthProvider } from './contexts/AuthContext'
 import { PrivateRoute } from './components/PrivateRoute'
+import { SmartLanding } from './components/SmartLanding'
+import { RouteWatcher } from './components/RouteWatcher'
 
 // Lazy loading para melhor performance
 const Login = lazy(() => import('./pages/organizer/Login'))
@@ -20,7 +22,7 @@ const Churras = lazy(() => import('./pages/organizer/Churras'))
 const Terms = lazy(() => import('./pages/Terms'))
 const Privacy = lazy(() => import('./pages/Privacy'))
 const GroupLanding = lazy(() => import('./pages/participant/GroupLanding'))
-const Landing = lazy(() => import('./pages/Landing'))
+// Landing é carregada internamente pelo SmartLanding apenas quando necessário
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'))
 const OrganizerLayout = lazy(() => import('./components/organizer/OrganizerLayout'))
 
@@ -46,11 +48,14 @@ function LoadingFallback() {
 export default function App() {
   return (
     <BrowserRouter>
+      {/* RouteWatcher: componente invisível que persiste a rota atual a cada navegação */}
+      <RouteWatcher />
       <AuthProvider>
         <Suspense fallback={<LoadingFallback />}>
           <Routes>
             {/* Rotas Públicas */}
-            <Route path="/" element={<Landing />} />
+            {/* SmartLanding: redireciona usuários autenticados para última rota salva */}
+            <Route path="/" element={<SmartLanding />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
 

@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState, useCallback } fr
 import type { Session, User } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
 import type { Profile } from '../types'
+import { clearLastRoute, clearAllAppState } from '../lib/persistence'
 
 interface AuthContextType {
   user: User | null
@@ -132,6 +133,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const signOut = useCallback(async () => {
+    // Limpa rota e estado de UI persistidos para que o próximo acesso
+    // vá para a Landing Page (comportamento de app nativo após logout)
+    clearLastRoute()
+    clearAllAppState()
     await supabase.auth.signOut()
   }, [])
 
