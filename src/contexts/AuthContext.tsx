@@ -10,6 +10,8 @@ interface AuthContextType {
   loading: boolean
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>
   signUp: (email: string, password: string, fullName: string, whatsapp: string) => Promise<{ error: Error | null }>
+  verifyOtp: (email: string, token: string, fullName: string, whatsapp: string) => Promise<{ error: Error | null }>
+  resendOtp: (email: string) => Promise<{ error: Error | null }>
   signOut: () => Promise<void>
 }
 
@@ -101,12 +103,40 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return { error }
   }, [])
 
+  const verifyOtp = useCallback(async (email: string, token: string, fullName: string, whatsapp: string) => {
+    const { data, error } = await supabase.auth.verifyOtp({
+      email,
+      token,
+      type: 'signup',
+    })
+
+    if (!error && data.user) {
+      await supabase.from('profiles')
+        .update({
+          full_name: fullName,
+          whatsapp,
+          accepted_terms_at: new Date().toISOString()
+        })
+        .eq('id', data.user.id)
+    }
+
+    return { error }
+  }, [])
+
+  const resendOtp = useCallback(async (email: string) => {
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: { shouldCreateUser: false },
+    })
+    return { error }
+  }, [])
+
   const signOut = useCallback(async () => {
     await supabase.auth.signOut()
   }, [])
 
   return (
-    <AuthContext.Provider value={{ user, profile, session, loading, signIn, signUp, signOut }}>
+    <AuthContext.Provider value={{ user, profile, session, loading, signIn, signUp, verifyOtp, resendOtp, signOut }}>
       {children}
     </AuthContext.Provider>
   )
