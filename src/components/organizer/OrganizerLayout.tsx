@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
-import { Link, useLocation, Outlet } from 'react-router-dom'
+import { Link, useLocation, Outlet, useNavigate } from 'react-router-dom'
 import { 
   Home, Users, Trophy, Calendar, DollarSign, Target, Settings,
-  Bell, Plus, ChevronDown, X, MoreHorizontal, ShoppingBag
+  Bell, Plus, ChevronDown, X, MoreHorizontal, ShoppingBag, LogOut
 } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 import { GroupProvider } from '../../contexts/GroupContext'
@@ -33,10 +33,13 @@ function urlBase64ToUint8Array(base64String: string) {
 }
 
 function OrganizerLayoutInner() {
-  const { profile } = useAuth()
+  const { profile, signOut } = useAuth()
   const location = useLocation()
+  const navigate = useNavigate()
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [isSubscribed, setIsSubscribed] = useState(false)
+  const [loggingOut, setLoggingOut] = useState(false)
 
   useEffect(() => {
     if ('serviceWorker' in navigator) {
@@ -119,6 +122,17 @@ function OrganizerLayoutInner() {
     }
   }
 
+  async function handleLogout() {
+    setLoggingOut(true)
+    try {
+      await signOut()
+      navigate('/', { replace: true })
+    } finally {
+      setLoggingOut(false)
+      setShowLogoutConfirm(false)
+    }
+  }
+
   const navItems = [
     { label: 'Dashboard', icon: <Home size={20} />, path: '/dashboard' },
     { label: 'Participantes', icon: <Users size={20} />, path: '/dashboard/participants' },
@@ -191,6 +205,59 @@ function OrganizerLayoutInner() {
             <button className="btn btn-primary btn-full" style={{ fontSize: '0.85rem', padding: '0.5rem' }}>
               Convidar
             </button>
+          </div>
+
+          {/* ── Logout — Sidebar Desktop ── */}
+          <div style={{ padding: '1rem', borderTop: '1px solid var(--border-default)' }}>
+            {showLogoutConfirm ? (
+              <div style={{
+                background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.25)',
+                borderRadius: 'var(--radius-md)', padding: '0.85rem'
+              }}>
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.75rem', textAlign: 'center', lineHeight: 1.4 }}>
+                  Tem certeza que quer sair?
+                </p>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <button
+                    onClick={() => setShowLogoutConfirm(false)}
+                    style={{
+                      flex: 1, padding: '0.45rem', borderRadius: 'var(--radius-sm)',
+                      background: 'var(--bg-base)', border: '1px solid var(--border-default)',
+                      color: 'var(--text-secondary)', fontSize: '0.8rem', cursor: 'pointer', fontWeight: 600
+                    }}
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    onClick={handleLogout}
+                    disabled={loggingOut}
+                    style={{
+                      flex: 1, padding: '0.45rem', borderRadius: 'var(--radius-sm)',
+                      background: '#ef4444', border: 'none',
+                      color: '#fff', fontSize: '0.8rem', cursor: 'pointer', fontWeight: 700,
+                      opacity: loggingOut ? 0.7 : 1
+                    }}
+                  >
+                    {loggingOut ? 'Saindo...' : 'Sair'}
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <button
+                onClick={() => setShowLogoutConfirm(true)}
+                style={{
+                  width: '100%', display: 'flex', alignItems: 'center', gap: '0.65rem',
+                  padding: '0.65rem 0.85rem', borderRadius: 'var(--radius-md)',
+                  background: 'transparent', border: 'none', cursor: 'pointer',
+                  color: 'var(--text-muted)', fontSize: '0.9rem', fontWeight: 500,
+                  transition: 'var(--transition-fast)',
+                }}
+                className="hover-bg-muted"
+              >
+                <LogOut size={18} />
+                Sair da conta
+              </button>
+            )}
           </div>
         </nav>
       </aside>
@@ -337,6 +404,85 @@ function OrganizerLayoutInner() {
                     <span style={{ fontSize: '0.75rem', fontWeight: 600, textAlign: 'center' }}>{item.label}</span>
                   </Link>
                 ))}
+
+                {/* Logout — Mobile Sheet */}
+                <button
+                  onClick={() => {
+                    setMobileMenuOpen(false)
+                    setTimeout(() => setShowLogoutConfirm(true), 200)
+                  }}
+                  style={{
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                    padding: '1rem', background: 'rgba(239,68,68,0.08)', borderRadius: 'var(--radius-lg)',
+                    color: '#ef4444', border: '1px solid rgba(239,68,68,0.2)', cursor: 'pointer', width: '100%'
+                  }}
+                >
+                  <LogOut size={20} style={{ marginBottom: '0.5rem' }} />
+                  <span style={{ fontSize: '0.75rem', fontWeight: 700 }}>Sair</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── Modal de Confirmação de Logout (Mobile) ── */}
+        {showLogoutConfirm && (
+          <div
+            className="lg:hidden"
+            style={{
+              position: 'fixed', inset: 0, zIndex: 60,
+              background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(6px)',
+              display: 'flex', alignItems: 'flex-end'
+            }}
+            onClick={() => setShowLogoutConfirm(false)}
+          >
+            <div
+              style={{
+                width: '100%', background: 'var(--bg-surface)',
+                borderRadius: '24px 24px 0 0', padding: '2rem 1.5rem 2.5rem',
+                boxShadow: 'var(--shadow-xl)'
+              }}
+              onClick={e => e.stopPropagation()}
+            >
+              <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+                <div style={{
+                  width: 56, height: 56, borderRadius: '50%',
+                  background: 'rgba(239,68,68,0.12)', border: '1.5px solid rgba(239,68,68,0.3)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  margin: '0 auto 1rem'
+                }}>
+                  <LogOut size={24} color="#ef4444" />
+                </div>
+                <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '1.1rem', marginBottom: '0.5rem' }}>
+                  Sair da conta?
+                </h3>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', lineHeight: 1.5 }}>
+                  Você precisará fazer login novamente para acessar o painel.
+                </p>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                <button
+                  onClick={handleLogout}
+                  disabled={loggingOut}
+                  style={{
+                    padding: '0.9rem', borderRadius: 'var(--radius-md)',
+                    background: '#ef4444', border: 'none', color: '#fff',
+                    fontSize: '1rem', fontWeight: 700, cursor: 'pointer',
+                    opacity: loggingOut ? 0.7 : 1, transition: 'opacity 0.2s'
+                  }}
+                >
+                  {loggingOut ? 'Saindo...' : 'Sim, sair'}
+                </button>
+                <button
+                  onClick={() => setShowLogoutConfirm(false)}
+                  style={{
+                    padding: '0.9rem', borderRadius: 'var(--radius-md)',
+                    background: 'var(--bg-base)', border: '1px solid var(--border-default)',
+                    color: 'var(--text-secondary)', fontSize: '1rem', fontWeight: 600, cursor: 'pointer'
+                  }}
+                >
+                  Cancelar
+                </button>
               </div>
             </div>
           </div>
