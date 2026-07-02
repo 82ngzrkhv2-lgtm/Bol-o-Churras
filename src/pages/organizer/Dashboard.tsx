@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
   Users, Trophy, Calendar, DollarSign, Target, Copy,
-  ExternalLink, ChevronRight, Upload, QrCode
+  ExternalLink, ChevronRight, Upload, QrCode, Plus
 } from 'lucide-react'
 import { useGroupContext } from '../../contexts/GroupContext'
 import toast from 'react-hot-toast'
@@ -53,6 +53,26 @@ export default function Dashboard() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      {/* Dashboard Page Header with 'Novo Evento' button */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+        <div>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '1.4rem', color: 'var(--text-primary)', margin: 0 }}>
+            Painel Geral
+          </h2>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: '0.2rem 0 0 0' }}>
+            Acompanhe o engajamento e as finanças do seu bolão
+          </p>
+        </div>
+        <Link 
+          to="/dashboard/groups/new" 
+          className="btn btn-primary" 
+          style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.5rem 1rem' }}
+        >
+          <Plus size={18} />
+          <span>Novo Evento</span>
+        </Link>
+      </div>
+
       {/* 4 KPIs Row */}
       <section style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
         <div className="card" style={{ padding: '1.25rem', display: 'flex', gap: '1rem' }}>
