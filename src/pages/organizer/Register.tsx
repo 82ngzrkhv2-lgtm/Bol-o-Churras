@@ -16,7 +16,7 @@ export default function Register() {
   const [loading, setLoading] = useState(false)
 
   // Step 2 — OTP
-  const [otpDigits, setOtpDigits] = useState(['', '', '', '', '', ''])
+  const [otpDigits, setOtpDigits] = useState(['', '', '', '', '', '', '', ''])
   const [verifying, setVerifying] = useState(false)
   const [resending, setResending] = useState(false)
   const [resendCooldown, setResendCooldown] = useState(0)
@@ -86,7 +86,7 @@ export default function Register() {
     setOtpDigits(newDigits)
 
     // Avança para o próximo campo automaticamente
-    if (digit && index < 5) {
+    if (digit && index < 7) {
       inputRefs.current[index + 1]?.focus()
     }
   }
@@ -104,26 +104,26 @@ export default function Register() {
       }
     }
     if (e.key === 'ArrowLeft' && index > 0) inputRefs.current[index - 1]?.focus()
-    if (e.key === 'ArrowRight' && index < 5) inputRefs.current[index + 1]?.focus()
+    if (e.key === 'ArrowRight' && index < 7) inputRefs.current[index + 1]?.focus()
   }
 
   function handleOtpPaste(e: React.ClipboardEvent) {
     e.preventDefault()
-    const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6)
+    const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 8)
     if (!pasted) return
     const newDigits = [...otpDigits]
     pasted.split('').forEach((ch, i) => { newDigits[i] = ch })
     setOtpDigits(newDigits)
     // Foca o campo após o último dígito colado
-    const nextIndex = Math.min(pasted.length, 5)
+    const nextIndex = Math.min(pasted.length, 7)
     inputRefs.current[nextIndex]?.focus()
   }
 
   async function handleVerify(e: React.FormEvent) {
     e.preventDefault()
     const token = otpDigits.join('')
-    if (token.length < 6) {
-      toast.error('Digite o código completo de 6 dígitos.')
+    if (token.length < 8) {
+      toast.error('Digite o código completo de 8 dígitos.')
       return
     }
 
@@ -133,7 +133,7 @@ export default function Register() {
 
     if (error) {
       toast.error(error.message || 'Código inválido ou expirado. Tente novamente.')
-      setOtpDigits(['', '', '', '', '', ''])
+      setOtpDigits(['', '', '', '', '', '', '', ''])
       inputRefs.current[0]?.focus()
     } else {
       toast.success('Email verificado! Bem-vindo(a) ao BolãoeChurras 🎉')
@@ -150,7 +150,7 @@ export default function Register() {
       toast.error(error.message || 'Não foi possível reenviar o código. Tente em instantes.')
     } else {
       toast.success('Novo código enviado para ' + email)
-      setOtpDigits(['', '', '', '', '', ''])
+      setOtpDigits(['', '', '', '', '', '', '', ''])
       inputRefs.current[0]?.focus()
       startCooldown()
     }
@@ -318,7 +318,7 @@ export default function Register() {
                   VERIFICAR EMAIL
                 </h2>
                 <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', lineHeight: 1.5 }}>
-                  Enviamos um código de 6 dígitos para<br />
+                  Enviamos um código de 8 dígitos para<br />
                   <strong style={{ color: 'var(--text-primary)' }}>{email}</strong>
                 </p>
               </div>
@@ -341,8 +341,8 @@ export default function Register() {
                       onKeyDown={e => handleOtpKeyDown(i, e)}
                       onPaste={i === 0 ? handleOtpPaste : undefined}
                       style={{
-                        width: '3rem', height: '3.5rem',
-                        textAlign: 'center', fontSize: '1.5rem', fontWeight: 700,
+                        width: '2.4rem', height: '3rem',
+                        textAlign: 'center', fontSize: '1.3rem', fontWeight: 700,
                         borderRadius: '0.6rem',
                         border: `2px solid ${digit ? 'var(--color-verde)' : 'var(--border-color, rgba(255,255,255,0.12))'}`,
                         background: 'var(--bg-card, rgba(255,255,255,0.05))',
@@ -367,7 +367,7 @@ export default function Register() {
                 <button
                   type="submit"
                   className="btn btn-azul btn-full"
-                  disabled={verifying || otpDigits.join('').length < 6}
+                  disabled={verifying || otpDigits.join('').length < 8}
                   style={{ marginBottom: '0.75rem' }}
                 >
                   {verifying ? (
