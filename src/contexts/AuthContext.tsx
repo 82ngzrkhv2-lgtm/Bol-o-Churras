@@ -10,8 +10,10 @@ interface AuthContextType {
   session: Session | null
   loading: boolean
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>
+  signInOtp: (email: string) => Promise<{ error: Error | null }>
   signUp: (email: string, password: string, fullName: string, whatsapp: string) => Promise<{ error: Error | null }>
   verifyOtp: (email: string, token: string, fullName: string, whatsapp: string) => Promise<{ error: Error | null }>
+  verifyLoginOtp: (email: string, token: string) => Promise<{ error: Error | null }>
   resendOtp: (email: string) => Promise<{ error: Error | null }>
   signOut: () => Promise<void>
 }
@@ -132,6 +134,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return { error }
   }, [])
 
+  const signInOtp = useCallback(async (email: string) => {
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: {
+        shouldCreateUser: false, // Só permite login de usuários já cadastrados
+      }
+    })
+    return { error }
+  }, [])
+
+  const verifyLoginOtp = useCallback(async (email: string, token: string) => {
+    const { error } = await supabase.auth.verifyOtp({
+      email,
+      token,
+      type: 'email',
+    })
+    return { error }
+  }, [])
+
   const signOut = useCallback(async () => {
     // Limpa rota e estado de UI persistidos para que o próximo acesso
     // vá para a Landing Page (comportamento de app nativo após logout)
@@ -141,7 +162,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   return (
-    <AuthContext.Provider value={{ user, profile, session, loading, signIn, signUp, verifyOtp, resendOtp, signOut }}>
+    <AuthContext.Provider value={{ 
+      user, profile, session, loading, 
+      signIn, signInOtp, signUp, verifyOtp, verifyLoginOtp, resendOtp, signOut 
+    }}>
       {children}
     </AuthContext.Provider>
   )
