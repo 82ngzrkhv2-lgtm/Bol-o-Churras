@@ -1,12 +1,14 @@
 import { Crown, Target } from 'lucide-react'
 import type { RankingEntry } from '../../types'
+import { useState, useEffect, useRef } from 'react'
 
 interface Props {
   ranking: RankingEntry[]
   currentParticipantId?: string
+  groupId?: string
 }
 
-export default function RankingView({ ranking, currentParticipantId }: Props) {
+export default function RankingView({ ranking, currentParticipantId, groupId }: Props) {
   if (ranking.length === 0) {
     return (
       <div className="card text-center animate-fade-in" style={{ padding: '3rem 1.5rem', marginTop: '0.5rem' }}>
@@ -23,8 +25,149 @@ export default function RankingView({ ranking, currentParticipantId }: Props) {
 
   const isActive = ranking.some(r => r.total_points > 0)
 
+  // Estados da experiência de revelação do ranking
+  const [revealState, setRevealState] = useState<'idle' | 'loading' | 'podium' | 'done'>(() => {
+    if (!isActive || !groupId || localStorage.getItem(`bolao:ranking_revealed:${groupId}`) === 'true') {
+      return 'done'
+    }
+    return 'loading'
+  })
+  
+  const [loadingTextIndex, setLoadingTextIndex] = useState(0)
+  const isFirstVisitSession = useRef(revealState === 'loading')
+
+  const loadingTexts = [
+    'Calculando resultado...',
+    'Conferindo palpites...',
+    'Organizando classificação...'
+  ]
+
+  // Efeito para transições e textos do Loading Overlay
+  useEffect(() => {
+    if (revealState === 'loading') {
+      const textTimer = setInterval(() => {
+        setLoadingTextIndex(prev => (prev < 2 ? prev + 1 : 2))
+      }, 1200)
+
+      const totalTimer = setTimeout(() => {
+        setRevealState('podium')
+      }, 3600)
+
+      return () => {
+        clearInterval(textTimer)
+        clearTimeout(totalTimer)
+      }
+    }
+  }, [revealState])
+
+  // Efeito para concluir a revelação do pódio e marcar como visto
+  useEffect(() => {
+    if (revealState === 'podium') {
+      const doneTimer = setTimeout(() => {
+        setRevealState('done')
+        if (groupId) {
+          localStorage.setItem(`bolao:ranking_revealed:${groupId}`, 'true')
+        }
+      }, 4000) // 3 segundos para as animações sequenciais de pódio + 1 segundo de folga
+
+      return () => clearTimeout(doneTimer)
+    }
+  }, [revealState, groupId])
+
+  // Render do Loading Overlay
+  if (revealState === 'loading') {
+    return (
+      <div style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 10000,
+        background: 'rgba(6, 11, 20, 0.93)',
+        backdropFilter: 'blur(10px)',
+        WebkitBackdropFilter: 'blur(10px)',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '2rem',
+        color: '#fff',
+      }}>
+        <div style={{
+          fontSize: '4.5rem',
+          marginBottom: '2rem',
+          animation: 'pulse 1.8s ease-in-out infinite',
+        }}>
+          🏆
+        </div>
+        <div style={{
+          fontFamily: 'var(--font-display)',
+          fontWeight: 800,
+          fontSize: '1.2rem',
+          letterSpacing: '0.05em',
+          textAlign: 'center',
+          color: 'var(--color-verde)',
+          textTransform: 'uppercase',
+          animation: 'pulse 1.2s ease-in-out infinite',
+        }}>
+          {loadingTexts[loadingTextIndex]}
+        </div>
+        <style>{`
+          @keyframes pulse {
+            0%, 100% { opacity: 0.4; transform: scale(0.97); }
+            50% { opacity: 1; transform: scale(1.03); }
+          }
+        `}</style>
+      </div>
+    )
+  }
+
+  // Render do Pódio e Classificação
   return (
     <div style={{ marginTop: '0.5rem' }}>
+      <style>{`
+        @keyframes fadeInUp {
+          from {
+            opacity: 0;
+            transform: translateY(28px) scale(0.94);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+          }
+        }
+        @keyframes expandIn {
+          from {
+            opacity: 0;
+            max-height: 0px;
+            transform: translateY(16px);
+          }
+          to {
+            opacity: 1;
+            max-height: 5000px;
+            transform: translateY(0);
+          }
+        }
+        .reveal-podium-3 {
+          opacity: 0;
+          animation: fadeInUp 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+          animation-delay: 0.5s;
+        }
+        .reveal-podium-2 {
+          opacity: 0;
+          animation: fadeInUp 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+          animation-delay: 1.5s;
+        }
+        .reveal-podium-1 {
+          opacity: 0;
+          animation: fadeInUp 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+          animation-delay: 2.5s;
+        }
+        .reveal-full-list {
+          opacity: 0;
+          overflow: hidden;
+          animation: expandIn 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+      `}</style>
+
       {/* Podium Top 3 */}
       {isActive && ranking.length >= 3 && (
         <div className="animate-fade-in-up" style={{
@@ -35,34 +178,54 @@ export default function RankingView({ ranking, currentParticipantId }: Props) {
           marginBottom: '1.5rem',
           padding: '1rem 0.5rem',
         }}>
-          {/* 2nd Place */}
-          <PodiumCard entry={ranking[1]} position={2} isCurrent={ranking[1]?.participant_id === currentParticipantId} />
-          {/* 1st Place */}
-          <PodiumCard entry={ranking[0]} position={1} isCurrent={ranking[0]?.participant_id === currentParticipantId} />
-          {/* 3rd Place */}
-          <PodiumCard entry={ranking[2]} position={3} isCurrent={ranking[2]?.participant_id === currentParticipantId} />
+          {revealState === 'podium' ? (
+            <>
+              {/* 2nd Place */}
+              <div className="reveal-podium-2" style={{ flex: 1 }}>
+                <PodiumCard entry={ranking[1]} position={2} isCurrent={ranking[1]?.participant_id === currentParticipantId} />
+              </div>
+              {/* 1st Place */}
+              <div className="reveal-podium-1" style={{ flex: 1 }}>
+                <PodiumCard entry={ranking[0]} position={1} isCurrent={ranking[0]?.participant_id === currentParticipantId} />
+              </div>
+              {/* 3rd Place */}
+              <div className="reveal-podium-3" style={{ flex: 1 }}>
+                <PodiumCard entry={ranking[2]} position={3} isCurrent={ranking[2]?.participant_id === currentParticipantId} />
+              </div>
+            </>
+          ) : (
+            <>
+              <PodiumCard entry={ranking[1]} position={2} isCurrent={ranking[1]?.participant_id === currentParticipantId} />
+              <PodiumCard entry={ranking[0]} position={1} isCurrent={ranking[0]?.participant_id === currentParticipantId} />
+              <PodiumCard entry={ranking[2]} position={3} isCurrent={ranking[2]?.participant_id === currentParticipantId} />
+            </>
+          )}
         </div>
       )}
 
-      {/* Lista completa */}
-      <h3 style={{
-        fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '0.82rem',
-        letterSpacing: '0.08em', color: 'var(--text-secondary)', textTransform: 'uppercase',
-        marginBottom: '0.75rem',
-      }}>
-        {isActive ? 'CLASSIFICAÇÃO COMPLETA' : 'PARTICIPANTES INSCRITOS'}
-      </h3>
+      {/* Lista completa e classificação */}
+      {revealState === 'done' && (
+        <div className={isFirstVisitSession.current ? 'reveal-full-list' : ''}>
+          <h3 style={{
+            fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '0.82rem',
+            letterSpacing: '0.08em', color: 'var(--text-secondary)', textTransform: 'uppercase',
+            marginBottom: '0.75rem',
+          }}>
+            {isActive ? 'CLASSIFICAÇÃO COMPLETA' : 'PARTICIPANTES INSCRITOS'}
+          </h3>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-        {ranking.map((entry, idx) => (
-          <RankingRow
-            key={entry.participant_id}
-            entry={entry}
-            isCurrent={entry.participant_id === currentParticipantId}
-            className={`animate-fade-in-up stagger-${Math.min(idx + 1, 5)}`}
-          />
-        ))}
-      </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            {ranking.map((entry, idx) => (
+              <RankingRow
+                key={entry.participant_id}
+                entry={entry}
+                isCurrent={entry.participant_id === currentParticipantId}
+                className={isFirstVisitSession.current ? '' : `animate-fade-in-up stagger-${Math.min(idx + 1, 5)}`}
+              />
+            ))}
+          </div>
+        </div>
+      )}
 
       {!isActive && (
         <div style={{

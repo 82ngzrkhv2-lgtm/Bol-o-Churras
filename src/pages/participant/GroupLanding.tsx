@@ -341,6 +341,7 @@ export default function GroupLanding() {
           <RankingView
             ranking={ranking}
             currentParticipantId={participant?.id}
+            groupId={group?.id}
           />
         )}
         {activeTab === 'palpites' && participant && (
