@@ -5,6 +5,7 @@ import { AuthProvider } from './contexts/AuthContext'
 import { PrivateRoute } from './components/PrivateRoute'
 import { SmartLanding } from './components/SmartLanding'
 import { RouteWatcher } from './components/RouteWatcher'
+import { UniversalBackButton } from './components/UniversalBackButton'
 
 // Lazy loading para melhor performance
 const Login = lazy(() => import('./pages/organizer/Login'))
@@ -50,6 +51,8 @@ export default function App() {
     <BrowserRouter>
       {/* RouteWatcher: componente invisível que persiste a rota atual a cada navegação */}
       <RouteWatcher />
+      {/* UniversalBackButton: botão flutuante para páginas sem layout */}
+      <UniversalBackButton />
       <AuthProvider>
         <Suspense fallback={<LoadingFallback />}>
           <Routes>

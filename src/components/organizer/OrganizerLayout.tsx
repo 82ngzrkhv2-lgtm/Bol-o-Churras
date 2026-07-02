@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react'
 import { Link, useLocation, Outlet, useNavigate } from 'react-router-dom'
 import { 
   Home, Users, Trophy, Calendar, DollarSign, Target, Settings,
-  Bell, Plus, ChevronDown, X, MoreHorizontal, ShoppingBag, LogOut
+  Bell, Plus, ChevronDown, X, MoreHorizontal, ShoppingBag, LogOut,
+  ArrowLeft
 } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 import { GroupProvider } from '../../contexts/GroupContext'
@@ -30,6 +31,20 @@ function urlBase64ToUint8Array(base64String: string) {
     outputArray[i] = rawData.charCodeAt(i)
   }
   return outputArray
+}
+
+function getPageTitle(pathname: string): string {
+  if (pathname === '/dashboard' || pathname === '/dashboard/') return 'Dashboard'
+  if (pathname.includes('/participants')) return 'Participantes'
+  if (pathname.includes('/matches')) return 'Jogos'
+  if (pathname.includes('/event')) return 'Dados do Evento'
+  if (pathname.includes('/payments')) return 'Pagamentos'
+  if (pathname.includes('/ranking')) return 'Ranking Geral'
+  if (pathname.includes('/predictions')) return 'Palpites'
+  if (pathname.includes('/churras')) return 'Lista do Churras'
+  if (pathname.includes('/settings')) return 'Configurações'
+  if (pathname.includes('/groups/new')) return 'Novo Evento'
+  return 'Painel'
 }
 
 function OrganizerLayoutInner() {
@@ -271,21 +286,46 @@ function OrganizerLayoutInner() {
           flexShrink: 0
         }}>
           <div className="flex items-center lg:hidden gap-2">
-            <div style={{
-              width: 32, height: 32,
-              display: 'flex', alignItems: 'center', justifyContent: 'center'
-            }}>
-              <img src="/logo.png" alt="Logo" style={{ width: '24px', height: '24px', objectFit: 'contain' }} />
-            </div>
-            <span style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: '1.1rem', letterSpacing: '-0.02em' }}>
-              Bolão<span style={{color: 'var(--color-verde)'}}>&</span>Churras
-            </span>
+            {location.pathname !== '/dashboard' && location.pathname !== '/dashboard/' ? (
+              <button 
+                onClick={() => navigate(-1)} 
+                style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: '0.4rem', 
+                  background: 'none', 
+                  border: 'none', 
+                  color: 'var(--text-primary)', 
+                  cursor: 'pointer',
+                  padding: '0.25rem 0.5rem 0.25rem 0',
+                  marginRight: '0.25rem',
+                  textAlign: 'left'
+                }}
+              >
+                <ArrowLeft size={20} style={{ color: 'var(--color-verde)' }} />
+                <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '1.1rem', letterSpacing: '-0.02em' }}>
+                  {getPageTitle(location.pathname)}
+                </span>
+              </button>
+            ) : (
+              <>
+                <div style={{
+                  width: 32, height: 32,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center'
+                }}>
+                  <img src="/logo.png" alt="Logo" style={{ width: '24px', height: '24px', objectFit: 'contain' }} />
+                </div>
+                <span style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: '1.1rem', letterSpacing: '-0.02em' }}>
+                  Bolão<span style={{color: 'var(--color-verde)'}}>&</span>Churras
+                </span>
+              </>
+            )}
           </div>
 
           <div className="hidden lg:block">
             <p style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>Olá, {profile?.full_name?.split(' ')[0] || 'Admin'} 👋</p>
             <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '1.2rem', color: 'var(--text-primary)' }}>
-              Dashboard
+              {getPageTitle(location.pathname)}
             </h1>
           </div>
 

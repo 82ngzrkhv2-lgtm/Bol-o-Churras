@@ -125,9 +125,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const resendOtp = useCallback(async (email: string) => {
-    const { error } = await supabase.auth.signInWithOtp({
+    const { error } = await supabase.auth.resend({
+      type: 'signup',
       email,
-      options: { shouldCreateUser: false },
     })
     return { error }
   }, [])

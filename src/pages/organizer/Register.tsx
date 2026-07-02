@@ -18,6 +18,7 @@ export default function Register() {
   // Step 2 — OTP
   const [otpDigits, setOtpDigits] = useState(['', '', '', '', '', ''])
   const [verifying, setVerifying] = useState(false)
+  const [resending, setResending] = useState(false)
   const [resendCooldown, setResendCooldown] = useState(0)
   const inputRefs = useRef<(HTMLInputElement | null)[]>([])
   const cooldownRef = useRef<ReturnType<typeof setInterval> | null>(null)
@@ -131,7 +132,7 @@ export default function Register() {
     setVerifying(false)
 
     if (error) {
-      toast.error('Código inválido ou expirado. Tente novamente.')
+      toast.error(error.message || 'Código inválido ou expirado. Tente novamente.')
       setOtpDigits(['', '', '', '', '', ''])
       inputRefs.current[0]?.focus()
     } else {
@@ -141,10 +142,12 @@ export default function Register() {
   }
 
   async function handleResend() {
-    if (resendCooldown > 0) return
+    if (resendCooldown > 0 || resending) return
+    setResending(true)
     const { error } = await resendOtp(email)
+    setResending(false)
     if (error) {
-      toast.error('Não foi possível reenviar o código. Tente em instantes.')
+      toast.error(error.message || 'Não foi possível reenviar o código. Tente em instantes.')
     } else {
       toast.success('Novo código enviado para ' + email)
       setOtpDigits(['', '', '', '', '', ''])
@@ -384,21 +387,30 @@ export default function Register() {
                 <button
                   type="button"
                   onClick={handleResend}
-                  disabled={resendCooldown > 0}
+                  disabled={resendCooldown > 0 || resending}
                   style={{
                     width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center',
                     gap: '0.4rem', padding: '0.6rem',
-                    background: 'none', border: 'none', cursor: resendCooldown > 0 ? 'not-allowed' : 'pointer',
-                    color: resendCooldown > 0 ? 'var(--text-muted)' : 'var(--color-verde)',
+                    background: 'none', border: 'none', cursor: (resendCooldown > 0 || resending) ? 'not-allowed' : 'pointer',
+                    color: (resendCooldown > 0 || resending) ? 'var(--text-muted)' : 'var(--color-verde)',
                     fontSize: '0.88rem', fontWeight: 500,
                     transition: 'color 0.2s',
                   }}
                 >
-                  <RotateCcw size={14} />
-                  {resendCooldown > 0
-                    ? `Reenviar em ${resendCooldown}s`
-                    : 'Reenviar código'
-                  }
+                  {resending ? (
+                    <>
+                      <span className="animate-spin inline-block w-3 h-3 border-2 border-[var(--color-verde)] border-t-transparent rounded-full" />
+                      Enviando...
+                    </>
+                  ) : (
+                    <>
+                      <RotateCcw size={14} />
+                      {resendCooldown > 0
+                        ? `Reenviar em ${resendCooldown}s`
+                        : 'Reenviar código'
+                      }
+                    </>
+                  )}
                 </button>
               </form>
 
