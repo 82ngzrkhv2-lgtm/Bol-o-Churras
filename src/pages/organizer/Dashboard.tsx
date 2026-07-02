@@ -5,11 +5,182 @@ import {
   ExternalLink, ChevronRight, Upload, QrCode, Plus
 } from 'lucide-react'
 import { useGroupContext } from '../../contexts/GroupContext'
+import { useAuth } from '../../contexts/AuthContext'
+import { supabase } from '../../lib/supabase'
 import toast from 'react-hot-toast'
 
 export default function Dashboard() {
-  const { activeGroup: group, stats, loading } = useGroupContext()
+  const { activeGroup: group, stats, refreshActiveGroup, loading } = useGroupContext()
+  const { user, profile } = useAuth()
   const [copiedSlug, setCopiedSlug] = useState<string | null>(null)
+  const [simulating, setSimulating] = useState(false)
+
+  // Verifica se o usuário atual é admin baseado no .env ou no banco de dados
+  const adminEmail = import.meta.env.VITE_ADMIN_EMAIL || 'reinandzn01@gmail.com'
+  const isSuperAdmin = profile?.is_admin || user?.email === adminEmail
+
+  // 1. Simular: Liberar Ranking (Marca taxa paga e coloca jogo no passado para simular encerramento dos palpites)
+  async function releaseRankingSim() {
+    if (!isSuperAdmin || !group) return
+    setSimulating(true)
+    try {
+      const { error: groupErr } = await supabase
+        .from('groups')
+        .update({ platform_fee_paid: true })
+        .eq('id', group.id)
+      
+      if (groupErr) throw groupErr
+
+      const yesterday = new Date()
+      yesterday.setDate(yesterday.getDate() - 1)
+      
+      const { error: matchErr } = await supabase
+        .from('matches')
+        .update({ match_date: yesterday.toISOString(), status: 'finished', home_score: 2, away_score: 1 })
+        .eq('group_id', group.id)
+
+      if (matchErr) throw matchErr
+
+      toast.success('Simulação: Ranking liberado com sucesso!')
+      await refreshActiveGroup()
+    } catch (err: any) {
+      toast.error(err.message || 'Erro ao simular liberação')
+    } finally {
+      setSimulating(false)
+    }
+  }
+
+  // 2. Simular: Bloquear Ranking (Reseta taxa e define jogos no futuro)
+  async function blockRankingSim() {
+    if (!isSuperAdmin || !group) return
+    setSimulating(true)
+    try {
+      const { error: groupErr } = await supabase
+        .from('groups')
+        .update({ platform_fee_paid: false })
+        .eq('id', group.id)
+      
+      if (groupErr) throw groupErr
+
+      const nextYear = new Date()
+      nextYear.setFullYear(nextYear.getFullYear() + 1)
+      
+      const { error: matchErr } = await supabase
+        .from('matches')
+        .update({ match_date: nextYear.toISOString(), status: 'scheduled', home_score: null, away_score: null })
+        .eq('group_id', group.id)
+
+      if (matchErr) throw matchErr
+
+      toast.success('Simulação: Ranking bloqueado!')
+      await refreshActiveGroup()
+    } catch (err: any) {
+      toast.error(err.message || 'Erro ao simular bloqueio')
+    } finally {
+      setSimulating(false)
+    }
+  }
+
+  // 3. Simular: Pagamento dos Participantes Confirmado
+  async function simulatePaymentConfirmed() {
+    if (!isSuperAdmin || !group) return
+    setSimulating(true)
+    try {
+      const { error } = await supabase
+        .from('participants')
+        .update({ payment_status: 'paid', has_paid: true, paid_at: new Date().toISOString() })
+        .eq('group_id', group.id)
+
+      if (error) throw error
+
+      toast.success('Simulação: Pagamentos dos participantes confirmados!')
+      await refreshActiveGroup()
+    } catch (err: any) {
+      toast.error(err.message || 'Erro ao simular pagamentos')
+    } finally {
+      setSimulating(false)
+    }
+  }
+
+  // 4. Simular: Resetar Status de Pagamento dos Participantes
+  async function resetPaymentStatus() {
+    if (!isSuperAdmin || !group) return
+    setSimulating(true)
+    try {
+      const { error } = await supabase
+        .from('participants')
+        .update({ payment_status: 'pending', has_paid: false, paid_at: null, receipt_url: null })
+        .eq('group_id', group.id)
+
+      if (error) throw error
+
+      toast.success('Simulação: Pagamentos pendentes!')
+      await refreshActiveGroup()
+    } catch (err: any) {
+      toast.error(err.message || 'Erro ao resetar pagamentos')
+    } finally {
+      setSimulating(false)
+    }
+  }
+
+  // 5. Simular: Repasse Concluído (Organizador paga a taxa)
+  async function simulatePlatformFeePaid() {
+    if (!isSuperAdmin || !group) return
+    setSimulating(true)
+    try {
+      const { error } = await supabase
+        .from('groups')
+        .update({ platform_fee_paid: true })
+        .eq('id', group.id)
+
+      if (error) throw error
+
+      toast.success('Simulação: Repasse concluído com sucesso!')
+      await refreshActiveGroup()
+    } catch (err: any) {
+      toast.error(err.message || 'Erro ao simular repasse')
+    } finally {
+      setSimulating(false)
+    }
+  }
+
+  // 6. Restaurar Estado Real (Volta tudo ao padrão não-pago e jogos no futuro)
+  async function restoreRealState() {
+    if (!isSuperAdmin || !group) return
+    setSimulating(true)
+    try {
+      const { error: groupErr } = await supabase
+        .from('groups')
+        .update({ platform_fee_paid: false })
+        .eq('id', group.id)
+
+      if (groupErr) throw groupErr
+
+      const { error: partsErr } = await supabase
+        .from('participants')
+        .update({ payment_status: 'pending', has_paid: false, paid_at: null, receipt_url: null })
+        .eq('group_id', group.id)
+
+      if (partsErr) throw partsErr
+
+      const inTwoDays = new Date()
+      inTwoDays.setDate(inTwoDays.getDate() + 2)
+      
+      const { error: matchErr } = await supabase
+        .from('matches')
+        .update({ match_date: inTwoDays.toISOString(), status: 'scheduled', home_score: null, away_score: null })
+        .eq('group_id', group.id)
+
+      if (matchErr) throw matchErr
+
+      toast.success('Simulação: Estado original restaurado!')
+      await refreshActiveGroup()
+    } catch (err: any) {
+      toast.error(err.message || 'Erro ao restaurar estado')
+    } finally {
+      setSimulating(false)
+    }
+  }
 
   function copyLink(slug: string) {
     const link = `${window.location.origin}/${slug}`
@@ -255,6 +426,81 @@ export default function Dashboard() {
           <button className="btn btn-ghost" style={{ padding: '0.5rem' }}><ChevronRight size={20} /></button>
         </div>
       </section>
+
+      {/* 🛠️ Painel do Admin (Modo Simulação / Ferramentas de Desenvolvimento) */}
+      {isSuperAdmin && (
+        <section className="card" style={{ 
+          padding: '1.5rem', 
+          border: '1.5px dashed var(--color-amarelo)',
+          background: 'rgba(250, 204, 21, 0.04)',
+          marginTop: '1.5rem'
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+            <div>
+              <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '1.1rem', color: 'var(--color-amarelo)', display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0 }}>
+                🛠️ Ferramentas de Desenvolvimento (Modo Admin)
+              </h3>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', margin: '0.2rem 0 0 0' }}>
+                Simule cenários em tempo real para testes rápidos sem transações PIX reais.
+              </p>
+            </div>
+            <span style={{ fontSize: '0.75rem', fontWeight: 700, padding: '0.2rem 0.5rem', borderRadius: '4px', background: 'var(--color-amarelo-bg)', color: 'var(--color-amarelo)' }}>
+              ADMIN ATIVO
+            </span>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.75rem' }}>
+            <button 
+              className="btn btn-outline" 
+              onClick={releaseRankingSim}
+              disabled={simulating}
+              style={{ fontSize: '0.85rem', padding: '0.6rem 0.8rem', borderColor: 'var(--color-verde)', color: 'var(--color-verde)' }}
+            >
+              🚀 Liberar Ranking
+            </button>
+            <button 
+              className="btn btn-outline" 
+              onClick={blockRankingSim}
+              disabled={simulating}
+              style={{ fontSize: '0.85rem', padding: '0.6rem 0.8rem', borderColor: '#ef4444', color: '#ef4444' }}
+            >
+              🔒 Bloquear Ranking
+            </button>
+            <button 
+              className="btn btn-outline" 
+              onClick={simulatePaymentConfirmed}
+              disabled={simulating}
+              style={{ fontSize: '0.85rem', padding: '0.6rem 0.8rem', borderColor: 'var(--color-azul)', color: 'var(--color-azul)' }}
+            >
+              💳 Simular Pagamentos
+            </button>
+            <button 
+              className="btn btn-outline" 
+              onClick={resetPaymentStatus}
+              disabled={simulating}
+              style={{ fontSize: '0.85rem', padding: '0.6rem 0.8rem', borderColor: 'var(--text-muted)', color: 'var(--text-muted)' }}
+            >
+              🔄 Resetar Pagamentos
+            </button>
+            <button 
+              className="btn btn-outline" 
+              onClick={simulatePlatformFeePaid}
+              disabled={simulating}
+              style={{ fontSize: '0.85rem', padding: '0.6rem 0.8rem', borderColor: '#8B5CF6', color: '#8B5CF6' }}
+            >
+              💸 Simular Repasse Taxa
+            </button>
+            <button 
+              className="btn btn-gold" 
+              onClick={restoreRealState}
+              disabled={simulating}
+              style={{ fontSize: '0.85rem', padding: '0.6rem 0.8rem', gridColumn: '1 / -1' }}
+            >
+              🛡️ Restaurar Estado Real
+            </button>
+          </div>
+        </section>
+      )}
     </div>
   )
 }
